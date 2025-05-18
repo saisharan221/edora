@@ -14,3 +14,6 @@ __pycache__/
 *.log
 *.sqlite3
 /uploads/
+
+# Flake8
+.flake8
