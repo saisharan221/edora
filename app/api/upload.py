@@ -1,5 +1,5 @@
 # Import required classes and functions from FastAPI.
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 # Import Path from pathlib — used for working with file paths.
 from pathlib import Path
 
@@ -16,7 +16,12 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Define a POST endpoint at the path /upload
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    url: str = Form(...),
+    desc: str = Form(...)
+):
     """
     Upload a file and save it to the uploads folder.
     """
