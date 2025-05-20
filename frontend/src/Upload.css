@@ -1,0 +1,86 @@
+/* Upload.css */
+
+.upload-container {
+  background-color: white;
+  padding: 15rem;
+  padding-top: 1rem; /* reduce top padding specifically */
+  border-radius: 10px;
+  max-width: 1200;
+  margin: 1rem auto; /* add vertical space and center horizontally */
+}
+
+.upload-title {
+  text-align: center;
+  color: #007bff;
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.upload-section {
+  margin-bottom: 1.5rem;
+}
+
+.upload-section label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.upload-section input[type="text"],
+.upload-section textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  resize: none;
+}
+
+.upload-box {
+  border: 2px dashed #00aaff;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+.upload-box span {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.upload-box a {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.upload-note {
+  margin-top: 0.5rem;
+  color: gray;
+  font-size: 0.9rem;
+}
+
+.upload-separator {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+.upload-btn {
+  display: block;
+  background-color: #007bff;
+  color: white;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin: auto;
+  margin-top: 1rem;
+}
+
+.upload-btn:hover {
+  background-color: #0056b3;
+}
