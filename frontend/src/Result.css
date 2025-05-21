@@ -1,0 +1,112 @@
+/* src/Result.css */
+.result-item {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 0.3rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* First Line: File Name (Bold & Larger) with Tag */
+.result-title {
+  font-size: 1.4rem;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between title and tag */
+}
+
+/* Style Tags like Labels */
+.result-tag {
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  display: inline-block; /* Make it look like a tag */
+}
+
+/* Yellow for Notes */
+.notes {
+  background-color: #ffd700;
+  color: black;
+}
+
+/* Green for Exam */
+.test {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Orange for Slides */
+.slides {
+  background-color: #0099ff;
+  color: white;
+}
+
+/* Second Line: File Preview (Gray & Medium Size) */
+.result-preview {
+  font-size: 1.1rem;
+  color: gray;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Third Line: Channel Name (Dark Gray & Smaller) */
+.result-channel {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #555;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Buttons: Wrapped with numbers inside */
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.like-btn,
+.dislike-btn,
+.comment-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 1rem;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+}
+
+/* Button Colors */
+.like-btn {
+  background-color: #35353d; /* Blue */
+  color: white;
+}
+
+.dislike-btn {
+  background-color: #35353d; /* Red */
+  color: white;
+}
+
+.comment-btn {
+  background-color: #35353d; /* Blue */
+  color: white;
+}
+
+/* Comment preview */
+.comment-preview {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
