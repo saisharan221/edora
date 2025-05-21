@@ -159,49 +159,56 @@
   font-size: 12px;
 }
 
-/* Top Posts List - New Simplified Style */
+/* Top Posts Box - New container with rounded edges */
+.top-posts-box {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Top Posts List - Updated Style */
 .top-posts-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .top-post-item {
   display: flex;
   align-items: center;
-  padding: 12px;
-  background-color: white;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.top-post-rank {
-  width: 24px;
-  height: 24px;
-  background-color: #4790e8;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  margin-right: 12px;
+.top-post-item:last-child {
+  border-bottom: none;
+}
+
+.top-post-info {
+  flex: 1;
+  overflow: hidden;
 }
 
 .top-post-title {
-  flex: 1;
   font-weight: 500;
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.top-post-author {
+  font-size: 12px;
+  color: #64748b;
 }
 
 .top-post-metrics {
   display: flex;
   gap: 8px;
-  margin-left: 8px;
+  margin-left: 12px;
 }
 
 /* Make sure the result component takes full height */

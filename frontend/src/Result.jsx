@@ -138,45 +138,53 @@ function Result({ searchQuery, searchType }) {
     },
   ]
 
-  // Top posts of the week - simplified to just title and like ratio
+  // Top posts of the week - simplified to just title, author and like ratio
   const topPosts = [
     {
       title: "1DV701 Exam Prep",
+      author: "StudyGroup42",
       likes: 87,
       dislikes: 4,
     },
     {
       title: "Subnetting Practice Problems",
+      author: "SubnetMaster",
       likes: 120,
       dislikes: 8,
     },
     {
       title: "Wireshark Tutorial",
+      author: "PacketAnalyst",
       likes: 92,
       dislikes: 3,
     },
     {
       title: "OSI Model Explained",
+      author: "NetworkGuru",
       likes: 78,
       dislikes: 5,
     },
     {
       title: "Network Security Fundamentals",
+      author: "SecurityPro",
       likes: 56,
       dislikes: 2,
     },
     {
       title: "Course Summary",
+      author: "TopStudent",
       likes: 65,
       dislikes: 2,
     },
     {
       title: "TCP/IP Deep Dive",
+      author: "NetworkPro",
       likes: 72,
       dislikes: 6,
     },
     {
       title: "Firewall Configuration Guide",
+      author: "SecurityAdmin",
       likes: 68,
       dislikes: 3,
     },
@@ -241,11 +249,13 @@ function Result({ searchQuery, searchType }) {
     </div>
   )
 
-  // Top Post Item Component - simplified version
-  const TopPostItem = ({ post, index }) => (
+  // Top Post Item Component - simplified version with author
+  const TopPostItem = ({ post }) => (
     <div className="top-post-item">
-      <div className="top-post-rank">{index + 1}</div>
-      <div className="top-post-title">{post.title}</div>
+      <div className="top-post-info">
+        <div className="top-post-title">{post.title}</div>
+        <div className="top-post-author">By {post.author}</div>
+      </div>
       <div className="top-post-metrics">
         <div className="metric likes">
           <ThumbsUpIcon />
@@ -280,10 +290,12 @@ function Result({ searchQuery, searchType }) {
           <h1 className="content-title">Top Posts of the week</h1>
         </div>
 
-        <div className="top-posts-list">
-          {topPosts.map((post, index) => (
-            <TopPostItem key={index} post={post} index={index} />
-          ))}
+        <div className="top-posts-box">
+          <div className="top-posts-list">
+            {topPosts.map((post, index) => (
+              <TopPostItem key={index} post={post} />
+            ))}
+          </div>
         </div>
       </section>
     </div>
