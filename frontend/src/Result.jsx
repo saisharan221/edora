@@ -1,4 +1,8 @@
+"use client"
+
+import { useState } from "react"
 import "./Result.css"
+import Post from "./Post"
 
 // Custom icon components to replace lucide-react
 const ThumbsUpIcon = () => (
@@ -55,6 +59,8 @@ const MessageCircleIcon = () => (
 )
 
 function Result({ searchQuery, searchType }) {
+  const [selectedPost, setSelectedPost] = useState(null)
+
   // Expanded mock results with more content
   const searchResults = [
     {
@@ -190,9 +196,18 @@ function Result({ searchQuery, searchType }) {
     },
   ]
 
+  // Find the full post data for a top post when clicked
+  const handleTopPostClick = (topPost) => {
+    // Find the matching full post from searchResults
+    const fullPost = searchResults.find((post) => post.title === topPost.title)
+
+    // If found, use that, otherwise use the top post data
+    setSelectedPost(fullPost || topPost)
+  }
+
   // Post Card Component for search results
   const PostCard = ({ post }) => (
-    <div className="post-card">
+    <div className="post-card" onClick={() => setSelectedPost(post)}>
       <div className="post-header">
         <h2 className="post-title">{post.title}</h2>
         <div className="post-tags">
@@ -251,7 +266,7 @@ function Result({ searchQuery, searchType }) {
 
   // Top Post Item Component - simplified version with author
   const TopPostItem = ({ post }) => (
-    <div className="top-post-item">
+    <div className="top-post-item" onClick={() => handleTopPostClick(post)}>
       <div className="top-post-info">
         <div className="top-post-title">{post.title}</div>
         <div className="top-post-author">By {post.author}</div>
@@ -298,6 +313,9 @@ function Result({ searchQuery, searchType }) {
           </div>
         </div>
       </section>
+
+      {/* Post Detail View */}
+      {selectedPost && <Post post={selectedPost} onClose={() => setSelectedPost(null)} />}
     </div>
   )
 }

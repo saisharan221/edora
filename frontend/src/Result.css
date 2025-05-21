@@ -31,6 +31,7 @@
 .content-title {
   font-size: 20px;
   font-weight: 700;
+  text-align: left;
 }
 
 /* Posts */
@@ -46,6 +47,13 @@
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .post-header {
@@ -58,11 +66,13 @@
 .post-title {
   font-weight: 600;
   font-size: 16px;
+  text-align: left;
 }
 
 .post-tags {
   display: flex;
   gap: 8px;
+  justify-content: flex-start;
 }
 
 .tag {
@@ -89,6 +99,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 8px;
+  text-align: left;
 }
 
 .file-icon {
@@ -106,12 +117,14 @@
 .file-name {
   font-size: 14px;
   color: #64748b;
+  text-align: left;
 }
 
 .post-description {
   font-size: 14px;
   color: #64748b;
   margin-bottom: 8px;
+  text-align: left;
 }
 
 .post-footer {
@@ -123,11 +136,13 @@
 .author {
   font-size: 12px;
   color: #64748b;
+  text-align: left;
 }
 
 .engagement-metrics {
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 
 .metric {
@@ -180,6 +195,12 @@
   justify-content: space-between;
   padding: 14px 16px;
   border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.top-post-item:hover {
+  background-color: #f1f5f9;
 }
 
 .top-post-item:last-child {
@@ -189,6 +210,7 @@
 .top-post-info {
   flex: 1;
   overflow: hidden;
+  text-align: left;
 }
 
 .top-post-title {
@@ -198,17 +220,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 4px;
+  text-align: left;
 }
 
 .top-post-author {
   font-size: 12px;
   color: #64748b;
+  text-align: left;
 }
 
 .top-post-metrics {
   display: flex;
   gap: 8px;
   margin-left: 12px;
+  justify-content: flex-end;
 }
 
 /* Make sure the result component takes full height */
