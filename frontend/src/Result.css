@@ -1,112 +1,214 @@
-/* src/Result.css */
-.result-item {
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
-  background-color: #f9f9f9;
-  border-radius: 0.3rem;
+/* Result Layout */
+.result-wrapper {
+  display: flex;
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100%;
 }
 
-/* First Line: File Name (Bold & Larger) with Tag */
-.result-title {
-  font-size: 1.4rem;
-  color: black;
+/* Result Container */
+.result-container {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 1px solid #e2e8f0;
+}
+
+/* Top Posts Container */
+.top-posts-container {
+  width: 350px;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: #f8fafc;
+}
+
+.content-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px; /* Space between title and tag */
+  margin-bottom: 24px;
 }
 
-/* Style Tags like Labels */
-.result-tag {
-  font-size: 0.9rem;
-  font-weight: bold;
-  padding: 5px 10px;
-  border-radius: 5px;
-  text-transform: uppercase;
-  display: inline-block; /* Make it look like a tag */
+.content-title {
+  font-size: 20px;
+  font-weight: 700;
 }
 
-/* Yellow for Notes */
-.notes {
-  background-color: #ffd700;
-  color: black;
-}
-
-/* Green for Exam */
-.test {
-  background-color: #4caf50;
-  color: white;
-}
-
-/* Orange for Slides */
-.slides {
-  background-color: #0099ff;
-  color: white;
-}
-
-/* Second Line: File Preview (Gray & Medium Size) */
-.result-preview {
-  font-size: 1.1rem;
-  color: gray;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* Third Line: Channel Name (Dark Gray & Smaller) */
-.result-channel {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #555;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* Buttons: Wrapped with numbers inside */
-.result-buttons {
+/* Posts */
+.posts-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  gap: 24px;
 }
 
-.like-btn,
-.dislike-btn,
-.comment-btn {
+.post-card {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.post-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.post-tags {
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  font-size: 1rem;
-  padding: 5px 10px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  width: fit-content;
+  height: 20px;
+  line-height: 1;
 }
 
-/* Button Colors */
-.like-btn {
-  background-color: #35353d; /* Blue */
+.tag-notes {
+  background-color: #f97316;
+}
+
+.tag-powerpoint {
+  background-color: #007aff;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.file-icon {
+  width: 24px;
+  height: 24px;
+  background-color: #d33922;
   color: white;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
 }
 
-.dislike-btn {
-  background-color: #35353d; /* Red */
+.file-name {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.post-description {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.author {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.engagement-metrics {
+  display: flex;
+  gap: 8px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  background-color: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  height: 22px;
+}
+
+.metric-icon {
+  margin-right: 4px;
+}
+
+.like-icon {
+  color: #4790e8;
+}
+
+.dislike-icon {
+  color: #d33922;
+}
+
+.comment-icon {
+  color: #4790e8;
+}
+
+.metric span {
+  font-size: 12px;
+}
+
+/* Top Posts List - New Simplified Style */
+.top-posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.top-post-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.top-post-rank {
+  width: 24px;
+  height: 24px;
+  background-color: #4790e8;
   color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 12px;
 }
 
-.comment-btn {
-  background-color: #35353d; /* Blue */
-  color: white;
+.top-post-title {
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Comment preview */
-.comment-preview {
-  position: absolute;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+.top-post-metrics {
+  display: flex;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+/* Make sure the result component takes full height */
+section.result-container {
+  height: calc(100vh - 60px); /* Adjust based on your header height */
+}
+
+section.top-posts-container {
+  height: calc(100vh - 60px); /* Adjust based on your header height */
 }
