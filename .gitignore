@@ -17,3 +17,6 @@ __pycache__/
 
 # Flake8
 .flake8
+
+# repo
+data/uploads/

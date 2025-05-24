@@ -6,7 +6,7 @@ services:
       dockerfile: ./app/Dockerfile
     volumes:
       - ./app:/app/app
-      - ./data/uploads:/uploads
+      - ./data/uploads:/app/data/uploads
       - ./requirements.txt:/app/requirements.txt:ro
     ports:
       - "8000:8000"
