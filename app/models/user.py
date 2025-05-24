@@ -1,9 +1,15 @@
-from __future__ import annotations
 import datetime as dt
-from typing import Optional, List
+from typing import List, Optional, TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+
+
+
+if TYPE_CHECKING:               # imports needed only for type checkers
+    from .channel import Channel
+    from .post import Post
+    from .comment import Comment
 
 
 class UserBase(SQLModel):
@@ -15,6 +21,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str = Field(nullable=False, max_length=1024)
+
     created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
     updated_at: dt.datetime = Field(
         default_factory=dt.datetime.utcnow,
@@ -22,7 +29,7 @@ class User(UserBase, table=True):
         nullable=False,
     )
 
-    # relationships
+    # relationships ----------------------------------------------------------
     channels: List["Channel"] = Relationship(back_populates="owner")
-    posts: List["Post"] = Relationship(back_populates="author")
+    posts:    List["Post"]    = Relationship(back_populates="author")
     comments: List["Comment"] = Relationship(back_populates="author")

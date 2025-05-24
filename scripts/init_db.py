@@ -18,6 +18,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, Session, select
 from sqlalchemy.engine.url import make_url
+from sqlalchemy.orm import configure_mappers 
 
 # --------------------------------------------------------------------------- env
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,13 +34,15 @@ ASYNC = url.drivername.startswith(("postgresql+asyncpg", "sqlite+aiosqlite"))
 # --------------------------------------------------------------------------- sync
 def _sync_init() -> None:
     from sqlmodel import create_engine
+    from app import models   
 
     engine = create_engine(DATABASE_URL, echo=True)
 
     # import AFTER engine so models don’t fail on import cycles
-    from app.models import User  # noqa: WPS433
-
+    configure_mappers()   
     SQLModel.metadata.create_all(engine)
+
+    from app.models import User  # noqa: WPS433
 
     # seed one user
     with Session(engine) as session:

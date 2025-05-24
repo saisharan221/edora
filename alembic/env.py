@@ -2,8 +2,11 @@ import os
 from logging.config import fileConfig
 
 from sqlalchemy import create_engine, pool
+import sqlmodel
 from alembic import context
 from sqlmodel import SQLModel
+from app import models
+
 
 # this grabs your .env if you’ve loaded it already, or falls back to the default
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/app.db")
@@ -17,10 +20,11 @@ config.set_main_option("sqlalchemy.url", SYNC_URL)
 fileConfig(config.config_file_name)
 
 # import your models so SQLModel.metadata is populated
-from app.users.models import User
-from app.resources.models import Resource
+from alembic import context
+from sqlmodel import Field, SQLModel
+from app.models import User 
 
-target_metadata = SQLModel.metadata
+target_metadata = sqlmodel.SQLModel.metadata
 
 def run_migrations_offline():
     context.configure(

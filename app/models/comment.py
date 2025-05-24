@@ -1,20 +1,20 @@
 import datetime as dt
-from typing import Optional, List
+from typing import Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class Comment(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     content: str
 
-    post_id: int = Field(foreign_key="post.id", index=True)
+    post_id: int = Field(foreign_key="post.id")
     author_id: int = Field(foreign_key="user.id")
-    parent_id: int | None = Field(default=None, foreign_key="comment.id")
+    parent_id: Optional[int] = Field(default=None, foreign_key="comment.id")
 
     post: "Post" = Relationship(back_populates="comments")
     author: "User" = Relationship(back_populates="comments")
-    replies: List["Comment"] = Relationship(
+    replies: list["Comment"] = Relationship(
         sa_relationship_kwargs={"remote_side": "Comment.id"}
     )
 

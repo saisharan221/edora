@@ -3,13 +3,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package manifests & install
+# Install JS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy rest of your React code
+# Copy everything else
 COPY . .
 
-# Expose Vite’s dev server & start it
-EXPOSE 3000
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+EXPOSE 5173
+
+# Run Vite in dev mode, listen on all interfaces
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]

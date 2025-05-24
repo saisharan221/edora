@@ -1,70 +1,88 @@
-import React from 'react';
+// src/Create.jsx
+import React, { useState } from "react";
 
-const Create = () => (
-  <div className="container bg-white p-4 sm:p-8 lg:p-12 rounded-xl shadow">
-    <h2 className="text-2xl sm:text-3xl font-semibold text-green-600 text-center mb-6">
-      Create Your Channel
-    </h2>
+export default function Create() {
+  const [name, setName] = useState("");
+  const [bio,  setBio]  = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-    {/* Channel name */}
-    <div className="mt-4">
-      <label htmlFor="channel-name" className="block font-semibold mb-1">
-        Channel Name
-      </label>
-      <input
-        id="channel-name"
-        type="text"
-        placeholder="Enter your channel name…"
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-      />
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    // grab your stored JWT
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("Not authenticated");
+      return;
+    }
+
+    // send to backend
+    const res = await fetch("http://127.0.0.1:8000/channels", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name, bio }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(body.detail || "Failed to create channel");
+    } else {
+      setSuccess("🎉 Channel created!");
+      setName("");
+      setBio("");
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow">
+      <h2 className="text-2xl font-semibold text-green-600 text-center mb-6">
+        Create Your Channel
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="channel-name" className="block font-medium mb-1">
+            Channel Name
+          </label>
+          <input
+            id="channel-name"
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            className="w-full rounded-md border border-slate-300 px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="channel-bio" className="block font-medium mb-1">
+            Channel Bio
+          </label>
+          <textarea
+            id="channel-bio"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            rows={4}
+            className="w-full rounded-md border border-slate-300 px-3 py-2"
+          />
+        </div>
+
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {success && <p className="text-green-600 text-sm">{success}</p>}
+
+        <button
+          type="submit"
+          className="w-full rounded-lg bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700"
+        >
+          Create Channel
+        </button>
+      </form>
     </div>
-
-    {/* Bio */}
-    <div className="mt-6">
-      <label htmlFor="channel-bio" className="block font-semibold mb-1">
-        Channel Bio
-      </label>
-      <textarea
-        id="channel-bio"
-        placeholder="Describe your channel, goals, and content…"
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-        rows={4}
-      />
-    </div>
-
-    {/* Logo upload */}
-    <div className="mt-6">
-      <strong className="font-semibold">Upload Channel Logo</strong>
-      <p className="text-sm text-slate-600 mb-3">Recommended 1:1 image, max 5 MB</p>
-
-      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-400 py-8 text-center">
-        <span className="text-sm">
-          Drag your logo file or <a href="/" className="text-blue-600 underline">browse</a>
-        </span>
-        <p className="text-xs text-slate-500">Supported formats : <b>.jpg .png .svg</b></p>
-      </div>
-    </div>
-
-    <hr className="my-8 border-slate-200" />
-
-    {/* Tags */}
-    <div className="mt-6">
-      <label htmlFor="channel-tags" className="block font-semibold mb-1">
-        Channel Tags
-      </label>
-      <input
-        id="channel-tags"
-        type="text"
-        placeholder="e.g. education, gaming, design…"
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-      />
-    </div>
-
-    {/* Button */}
-    <button className="mt-8 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700">
-      Create Channel
-    </button>
-  </div>
-);
-
-export default Create;
+  );
+}

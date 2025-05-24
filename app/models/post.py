@@ -1,7 +1,9 @@
 import datetime as dt
-from typing import Optional, List
+from datetime import datetime     # ← add this
+from typing import List, Optional  # ← add List here
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import SQLModel, Field, Relationship
+from .post_tag import PostTag
 
 
 class Post(SQLModel, table=True):
@@ -15,6 +17,10 @@ class Post(SQLModel, table=True):
     channel: "Channel" = Relationship(back_populates="posts")
     author: "User" = Relationship(back_populates="posts")
 
+    files: list["MediaFile"] = Relationship(back_populates="post")
+    comments: list["Comment"] = Relationship(back_populates="post")
+    tags: list["Tag"] = Relationship(back_populates="posts", link_model=PostTag)
+
     created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
     updated_at: dt.datetime = Field(
         default_factory=dt.datetime.utcnow,
@@ -22,8 +28,25 @@ class Post(SQLModel, table=True):
         nullable=False,
     )
 
-    files: List["MediaFile"] = Relationship(back_populates="post")
-    comments: List["Comment"] = Relationship(back_populates="post")
-    tags: List["Tag"] = Relationship(
-        back_populates="posts", link_model="PostTag"  # type: ignore
-    )
+class PostCreate(SQLModel):
+    title: str
+    content: str
+    channel_id: int
+
+class MediaFileRead(SQLModel):
+    id: int
+    filename: str
+
+    class Config:
+        from_attributes = True
+
+class PostRead(SQLModel):
+    id: int
+    title: str
+    content: str
+    author_id: int
+    created_at: datetime             # now datetime is defined
+    files: List[MediaFileRead] = []  # now List is defined
+
+    class Config:
+        from_attributes = True
