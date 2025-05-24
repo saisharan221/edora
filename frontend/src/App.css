@@ -5,34 +5,6 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
 .card {
   padding: 2em;
 }
@@ -59,10 +31,21 @@
   padding: 20px;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
+.edora-logo {
+  width: 70%; /* half of current container */
+  height: 7%;
+  margin-bottom: 20px; /* optional spacing */
+}
+
+.link-content {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* space between icon and text */
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
 }
 
 .nav-links a,
@@ -142,11 +125,6 @@
   border: 1px solid #cce0ff;
 }
 
-.upload-box img {
-  width: 60px;
-  margin-bottom: 10px;
-}
-
 .upload-box h3 {
   margin: 10px 0 5px;
   color: #005be4;
@@ -187,23 +165,6 @@ body {
   height: 100vh;
 }
 
-.sidebar {
-  width: 240px;
-  background: #fff;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-right: 1px solid #e0e0e0;
-}
-
-.logo {
-  font-size: 22px;
-  font-weight: bold;
-  color: #1a1a1a;
-  margin-bottom: 20px;
-}
-
 .nav-links,
 .bottom-links {
   display: flex;
@@ -233,6 +194,17 @@ body {
 .user-profile {
   text-align: center;
   padding-top: 20px;
+}
+
+.points-display {
+  gap: 8px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.coins-icon {
+  width: 24px;
+  height: 24px;
 }
 
 .avatar {
@@ -454,6 +426,15 @@ body {
   cursor: pointer;
 }
 
+.channel-box {
+  border: 1px solid #eee; /* lighter, solid border */
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  background-color: #f9f9f9; /* subtle contrast */
+  transition: all 0.3s ease;
+}
+
 .upload-area {
   margin: 15px 0;
   color: #888;
@@ -506,4 +487,3 @@ textarea::placeholder {
   padding: 10px;
   outline: none;
 }
-
