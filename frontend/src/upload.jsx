@@ -1,8 +1,9 @@
 // Upload.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './Upload.css';
 
 const Upload = () => {
+  const fileInputRef = useRef(null);
   const [file, setFile] = useState(null)
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
@@ -63,10 +64,30 @@ const Upload = () => {
         <strong>Document Upload</strong>
         <p>Add your documents here, and you can upload up to 5 files max</p>
         <div className="upload-box">
-          <input type="file" onChange={handleFileChange} />
-          <span>Drag your file(s) or <a href="/">browse</a></span>
+          <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: "none" }} // optional: hide the input
+          />
+          <span>Drag your file(s) or {" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();         // prevent page reload
+                fileInputRef.current.click(); // trigger file input
+              }}
+            >
+              browse
+            </a>
+          </span>
           <p>Max 10 MB files are allowed</p>
         </div>
+        {file && (
+          <p className="selected-file">
+            Selected file: <strong>{file.name}</strong>
+          </p>
+        )}
         <p className="upload-note">Only support .jpg, .png and .svg and zip files</p>
       </div>
 
