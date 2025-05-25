@@ -177,28 +177,30 @@ function App() {
 
       <main className="main-content">
         <header className="header flex items-center gap-2">
-          <div className="flex border border-gray-200 rounded-lg overflow-hidden flex-1 bg-white">
+          <div className="search-bar-container">
             <select
               className="appearance-none px-3 py-2 text-sm border-r border-gray-200 focus:outline-none bg-white"
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
+              style={{ border: 'none', background: 'transparent', borderRadius: '9999px 0 0 9999px' }}
             >
               <option value="file">File</option>
               <option value="channel">Channel</option>
             </select>
             <input
               type="text"
-              className="flex-grow px-4 py-2 focus:outline-none"
-              placeholder={`Search by ${searchType}...`}
+              className="search-bar-input"
+              placeholder="Search your topic here..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
             />
-            <button
-              className="bg-purple-600 text-white px-4 py-2 hover:bg-purple-700 transition focus:outline-none"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
+            <span className="search-bar-icon" onClick={handleSearch} style={{ cursor: 'pointer' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
           </div>
         </header>
 

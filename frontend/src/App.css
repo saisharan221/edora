@@ -87,12 +87,67 @@
   margin-bottom: 20px;
 }
 
-.search-bar input {
-  color: #333; /* ensure text is visible */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 1rem auto;
+  background: #f8fafc;
+  border-radius: 9999px;
+  box-shadow: 0 2px 12px rgba(60, 120, 240, 0.07);
+  border: 1.5px solid #dbeafe;
+  padding: 0.25rem 0.75rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  min-height: 40px;
+}
+
+.search-bar-container:focus-within {
+  box-shadow: 0 4px 16px rgba(60, 120, 240, 0.13);
+  border-color: #3b82f6;
+  background: #f1f5fd;
+}
+
+.search-bar-input {
   flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1.05rem;
+  padding: 0.5rem 0.5rem;
+  color: #22223b;
+  border-radius: 9999px;
+}
+
+.search-bar-input::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.search-bar-icon {
+  margin-left: 0.5rem;
+  color: #3b82f6;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.search-bar-container:focus-within .search-bar-icon {
+  color: #2563eb;
+}
+
+/* Remove old search-bar input styles if present */
+.search-bar input {
+  background: none;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+  border-radius: 0;
 }
 
 .filter-button {
@@ -223,20 +278,11 @@ body {
 
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
-}
-
-.search-bar {
-  color: #333;
-  flex: 1;
-  align-items: center;
-  padding: 10px 14px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  outline: none;
-  background-color: #fff;
+  margin-bottom: 10px;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .filter-btn {
@@ -474,13 +520,4 @@ select {
 input[type="text"]::placeholder,
 textarea::placeholder {
   color: #888; /* light placeholder text */
-}
-
-.search-bar input {
-  background-color: white;
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 10px;
-  outline: none;
 }
