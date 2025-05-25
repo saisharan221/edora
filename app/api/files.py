@@ -4,7 +4,7 @@ from uuid import uuid4
 from typing import List
 from fastapi.responses import FileResponse
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlmodel import Session
 
 from app.database import engine
@@ -27,6 +27,7 @@ def db() -> Session:
 @router.post("/upload", response_model=List[MediaFile])
 async def upload_files(
     files: List[UploadFile] = File(...),
+    post_id: int = Form(None),
     user: User = Depends(current_user),
     session: Session = Depends(db),
 ):
@@ -49,6 +50,7 @@ async def upload_files(
             filename=str(dest.relative_to(UPLOAD_DIR)),
             mime_type=up.content_type or "",
             size=len(contents),
+            post_id=post_id,
         )
         session.add(mf)
         saved.append(mf)

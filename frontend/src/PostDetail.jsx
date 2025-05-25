@@ -46,6 +46,15 @@ function PostDetail({ post, onClose }) {
                         alt={file.filename.split('/').pop()}
                         className="file-preview-image"
                       />
+                    ) : file.mime_type === 'application/pdf' ? (
+                      <iframe
+                        src={`${API}/files/${file.filename}`}
+                        title={file.filename.split('/').pop()}
+                        className="file-preview-pdf"
+                        width="100%"
+                        height="200px"
+                        style={{ border: 'none', borderRadius: '8px' }}
+                      />
                     ) : (
                       <div className="file-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
