@@ -1,0 +1,16 @@
+# frontend/Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install JS deps
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy everything else
+COPY . .
+
+EXPOSE 5173
+
+# Run Vite in dev mode, listen on all interfaces
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
