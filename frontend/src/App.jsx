@@ -1,5 +1,6 @@
 import './App.css';
 import React, { useState } from 'react';
+import Login from './Login';               // ← our new Login component
 import uploadImage from './assets/upload.jpg';
 import edoraImage from './assets/edora.png';
 import homeImage from './assets/dashboard.png';
@@ -14,16 +15,63 @@ import createImage from './assets/create.png';
 import Upload from './Upload';
 import Create from './Create';
 import Result from './Result';
+import Channels from './Channels';
+
+
+
 
 function App() {
-  const [activeScene, setActiveScene] = useState('home');
+  // if no token, start on the Login screen
+  const [activeScene, setActiveScene] = useState(
+    localStorage.getItem('access_token') ? 'home' : 'login'
+  );
   const [points, setPoints] = useState(240);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
+  const [channelsVersion, setChannelsVersion] = useState(0);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const handleSearch = () => {
-    console.log(`Searching for "${searchQuery}" in ${searchType}s`);
-    setActiveScene('result');
+  // show only the Login form until onLogin() is called
+  if (activeScene === 'login') {
+    return <Login onLogin={() => setActiveScene('home')} />;
+  }
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    const token = localStorage.getItem('access_token');
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+    try {
+      let results;
+      if (searchType === 'file') {
+        // Search posts (which contain files)
+        const response = await fetch(`${API}/posts/search?q=${encodeURIComponent(searchQuery)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Search failed');
+        results = await response.json();
+      } else if (searchType === 'channel') {
+        // Search channels
+        const response = await fetch(`${API}/channels/?q=${encodeURIComponent(searchQuery)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Search failed');
+        results = await response.json();
+      }
+
+      setSearchResults(results);
+      setActiveScene('result');
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('Search failed: ' + error.message);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setActiveScene("login");
   };
 
   return (
@@ -31,6 +79,7 @@ function App() {
       <aside className="sidebar">
         <img src={edoraImage} alt="edora" className="edora-logo" />
         <nav className="nav-links">
+          {/* Home */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'home' ? 'active' : ''}`}
@@ -41,7 +90,7 @@ function App() {
               <span>Home</span>
             </div>
           </div>
-
+          {/* Channels */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'channels' ? 'active' : ''}`}
@@ -52,7 +101,7 @@ function App() {
               <span>Channels</span>
             </div>
           </div>
-
+          {/* Messages */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'messages' ? 'active' : ''}`}
@@ -63,7 +112,7 @@ function App() {
               <span>Messages</span>
             </div>
           </div>
-
+          {/* Saved */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'saved' ? 'active' : ''}`}
@@ -77,6 +126,7 @@ function App() {
         </nav>
 
         <div className="bottom-links">
+          {/* Notifications */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'notifications' ? 'active' : ''}`}
@@ -87,18 +137,18 @@ function App() {
               <span>Notifications</span>
             </div>
           </div>
-
-          <div
-            role="button"
-            className={`clickable-link ${activeScene === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveScene('settings')}
-          >
-            <div className="link-content">
-              <img src={settingImage} alt="settings" className="icon" />
-              <span>Settings</span>
-            </div>
+          {/* Settings */}
+        <div
+          role="button"
+          className={`clickable-link ${activeScene === "settings" ? "active" : ""}`}
+          onClick={handleLogout}
+        >
+          <div className="link-content">
+            <img src={settingImage} alt="logout" className="icon" />
+            <span>Logout</span>
           </div>
-
+        </div>
+          {/* Support */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'support' ? 'active' : ''}`}
@@ -127,61 +177,60 @@ function App() {
 
       <main className="main-content">
         <header className="header flex items-center gap-2">
-          <div className="flex border border-gray-200 rounded-lg overflow-hidden flex-1 bg-white">
+          <div className="search-bar-container">
             <select
               className="appearance-none px-3 py-2 text-sm border-r border-gray-200 focus:outline-none bg-white"
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
+              style={{ border: 'none', background: 'transparent', borderRadius: '9999px 0 0 9999px' }}
             >
               <option value="file">File</option>
               <option value="channel">Channel</option>
             </select>
-
             <input
               type="text"
-              className="flex-grow px-4 py-2 focus:outline-none"
-              placeholder={`Search by ${searchType}...`}
+              className="search-bar-input"
+              placeholder="Search your topic here..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
             />
-
-            <button
-              className="bg-purple-600 text-white px-4 py-2 hover:bg-purple-700 transition focus:outline-none"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
+            <span className="search-bar-icon" onClick={handleSearch} style={{ cursor: 'pointer' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
           </div>
         </header>
 
-        {/* 🔁 Scene-based rendering */}
-        {activeScene === 'upload' ? (
-          <Upload />
-        ) : activeScene === 'create' ? (
-          <Create />
-        ) : activeScene === 'result' ? (
-          <Result searchQuery={searchQuery} searchType={searchType} />
-        ) : (
-          <section className="dashboard">
-            <div className="subscribed">
-              <div
-                className="upload-box clickable-panel"
-                onClick={() => setActiveScene('create')}
-              >
-                <img src={createImage} alt="create channel" />
-                <h3>Create Your Channel</h3>
-                <p>Build your own community and start sharing content now!</p>
-              </div>
-            </div>
+{activeScene === 'channels' && <Channels key={channelsVersion} />}
+{activeScene === 'upload'   && <Upload />}
+{activeScene === 'create'   && <Create onChannelCreated={() => setChannelsVersion(v => v + 1)} />}
+{activeScene === 'result'   && (
+  <Result searchQuery={searchQuery} searchType={searchType} results={searchResults} />
+)}
+{!['channels','upload','create','result'].includes(activeScene) && (
+  <section className="dashboard">
+    <div className="subscribed">
+      <div
+        className="upload-box clickable-panel"
+        onClick={() => setActiveScene('create')}
+      >
+        <img src={createImage} alt="create channel" />
+        <h3>Create Your Channel</h3>
+        <p>Build your own community and start sharing content now!</p>
+      </div>
+    </div>
 
-            <div
-              className="upload-box clickable-panel"
-              onClick={() => setActiveScene('upload')}
-            >
-              <img src={uploadImage} alt="upload" />
-              <h3>Upload Your Documents</h3>
-              <p>Start helping others by uploading your own documents here!</p>
-            </div>
+    <div
+      className="upload-box clickable-panel"
+      onClick={() => setActiveScene('upload')}
+    >
+      <img src={uploadImage} alt="upload" />
+      <h3>Upload Your Documents</h3>
+      <p>Start helping others by uploading your own documents here!</p>
+    </div>
 
             <div className="recent-activity">
               <h4>Your Recent Activity</h4>

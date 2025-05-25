@@ -1,42 +1,89 @@
-// Create.jsx
-import React from 'react';
-import './Create.css';
+// src/Create.jsx
+import React, { useState } from "react";
 
-const Create = () => {
+export default function Create({ onChannelCreated }) {
+  const [name, setName] = useState("");
+  const [bio,  setBio]  = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    // grab your stored JWT
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("Not authenticated");
+      return;
+    }
+
+    // send to backend
+    const res = await fetch("http://127.0.0.1:8000/channels", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name, bio }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(body.detail || "Failed to create channel");
+    } else {
+      setSuccess("🎉 Channel created!");
+      setName("");
+      setBio("");
+      onChannelCreated?.(); // Call the callback when channel is created
+    }
+  };
+
   return (
-    <div className="create-container">
-      <h2 className="create-title">Create Your Channel</h2>
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow">
+      <h2 className="text-2xl font-semibold text-green-600 text-center mb-6">
+        Create Your Channel
+      </h2>
 
-      <div className="create-section">
-        <label htmlFor="channel-name">Channel Name</label>
-        <input type="text" id="channel-name" placeholder="Enter your channel name..." />
-      </div>
-
-      <div className="create-section">
-        <label htmlFor="channel-bio">Channel Bio</label>
-        <textarea id="channel-bio" placeholder="Describe your channel, goals, and content..." />
-      </div>
-
-      <div className="create-section">
-        <strong>Upload Channel Logo</strong>
-        <p>Upload an image to represent your channel</p>
-        <div className="create-box">
-          <span>Drag your logo file or <a href="/">browse</a></span>
-          <p>Max 5 MB. Recommended: 1:1 ratio image (e.g. 300x300 px)</p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="channel-name" className="block font-medium mb-1">
+            Channel Name
+          </label>
+          <input
+            id="channel-name"
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+            className="w-full rounded-md border border-slate-300 px-3 py-2"
+          />
         </div>
-        <p className="create-note">Supported formats: .jpg, .png, .svg</p>
-      </div>
 
-      <hr className="create-separator" />
+        <div>
+          <label htmlFor="channel-bio" className="block font-medium mb-1">
+            Channel Bio
+          </label>
+          <textarea
+            id="channel-bio"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            rows={4}
+            className="w-full rounded-md border border-slate-300 px-3 py-2"
+          />
+        </div>
 
-      <div className="create-section">
-        <label htmlFor="channel-tags">Channel Tags</label>
-        <input type="text" id="channel-tags" placeholder="e.g. education, gaming, design..." />
-      </div>
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {success && <p className="text-green-600 text-sm">{success}</p>}
 
-      <button className="create-btn">Create Channel</button>
+        <button
+          type="submit"
+          className="w-full rounded-lg bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700"
+        >
+          Create Channel
+        </button>
+      </form>
     </div>
   );
-};
-
-export default Create;
+}
