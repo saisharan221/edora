@@ -1,52 +1,80 @@
 import datetime as dt
-from datetime import datetime     # ← add this
-from typing import List, Optional  # ← add List here
+from typing import List, Optional, TYPE_CHECKING
 
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .user import User
+    from .channel import Channel
+    from .comment import Comment
+    from .media_file import MediaFile
+    from .post_reaction import PostReaction
+    from .tag import Tag
+    from .saved_post import SavedPost
+
 from .post_tag import PostTag
 
 
-class Post(SQLModel, table=True):
+class PostBase(SQLModel):
+    title: str = Field(nullable=False, max_length=200)
+    content: str = Field(nullable=False, max_length=10000)
+
+
+class Post(PostBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    title: str = Field(max_length=200, index=True)
-    content: str
-
-    channel_id: int = Field(foreign_key="channel.id")
-    author_id: int = Field(foreign_key="user.id")
-
-    channel: "Channel" = Relationship(back_populates="posts")
-    author: "User" = Relationship(back_populates="posts")
-
-    files: list["MediaFile"] = Relationship(back_populates="post")
-    comments: list["Comment"] = Relationship(back_populates="post")
-    tags: list["Tag"] = Relationship(back_populates="posts", link_model=PostTag)
-
-    created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
+    
+    # Foreign keys
+    channel_id: int = Field(foreign_key="channel.id", nullable=False)
+    author_id: int = Field(foreign_key="user.id", nullable=False)
+    
+    # Timestamps
+    created_at: dt.datetime = Field(
+        default_factory=dt.datetime.utcnow, 
+        nullable=False
+    )
     updated_at: dt.datetime = Field(
         default_factory=dt.datetime.utcnow,
         sa_column_kwargs={"onupdate": dt.datetime.utcnow},
         nullable=False,
     )
+    
+    # Relationships
+    channel: "Channel" = Relationship(back_populates="posts")
+    author: "User" = Relationship(back_populates="posts")
+    comments: List["Comment"] = Relationship(back_populates="post")
+    files: List["MediaFile"] = Relationship(back_populates="post")
+    reactions: List["PostReaction"] = Relationship(back_populates="post")
+    tags: List["Tag"] = Relationship(
+        back_populates="posts", 
+        link_model=PostTag
+    )
+    saved_by_users: List["SavedPost"] = Relationship(back_populates="post")
 
-class PostCreate(SQLModel):
-    title: str
-    content: str
+
+class PostCreate(PostBase):
     channel_id: int
+
 
 class MediaFileRead(SQLModel):
     id: int
     filename: str
+    mime_type: str
+    size: int
 
     class Config:
         from_attributes = True
 
-class PostRead(SQLModel):
+
+class PostRead(PostBase):
     id: int
-    title: str
-    content: str
+    channel_id: int
     author_id: int
-    created_at: datetime             # now datetime is defined
-    files: List[MediaFileRead] = []  # now List is defined
+    created_at: dt.datetime
+    updated_at: dt.datetime
+    files: List[MediaFileRead] = []
+    like_count: int = 0
+    dislike_count: int = 0
+    is_saved: bool = False
 
     class Config:
         from_attributes = True

@@ -53,10 +53,28 @@ def list_channels(
     session: Session = Depends(get_session),
     current: User = Depends(current_user),
 ):
-    # Only return channels owned by the current user
-    return session.exec(
-        select(Channel).where(Channel.owner_id == current.id)
-    ).all()
+    # Return all channels
+    return session.exec(select(Channel)).all()
+
+
+@router.get(
+    "/{channel_id}",
+    response_model=ChannelRead,
+)
+def get_channel(
+    channel_id: int,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Get a specific channel by ID."""
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Channel not found"
+        )
+    return channel
+
 
 @router.get(
     "/{channel_id}/posts",
@@ -67,6 +85,17 @@ def list_channel_posts(
     channel_id: int,
     session: Session = Depends(get_session),
 ):
+    # Check if channel exists
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Channel not found"
+        )
+    
+    # Get all posts in channel, ordered by creation date
     return session.exec(
-        select(Post).where(Post.channel_id == channel_id)
+        select(Post)
+        .where(Post.channel_id == channel_id)
+        .order_by(Post.created_at.desc())
     ).all()

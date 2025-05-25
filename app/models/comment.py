@@ -1,21 +1,45 @@
 import datetime as dt
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .user import User
+    from .post import Post
 
 
-class Comment(SQLModel, table=True):
+class CommentBase(SQLModel):
+    content: str = Field(nullable=False, max_length=2000)
+
+
+class Comment(CommentBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    content: str
-
-    post_id: int = Field(foreign_key="post.id")
-    author_id: int = Field(foreign_key="user.id")
-    parent_id: Optional[int] = Field(default=None, foreign_key="comment.id")
-
+    content: str = Field(nullable=False, max_length=2000)
+    
+    # Foreign keys
+    post_id: int = Field(foreign_key="post.id", nullable=False)
+    author_id: int = Field(foreign_key="user.id", nullable=False)
+    
+    # Timestamps
+    created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
+    updated_at: dt.datetime = Field(
+        default_factory=dt.datetime.utcnow,
+        sa_column_kwargs={"onupdate": dt.datetime.utcnow},
+        nullable=False,
+    )
+    
+    # Relationships
     post: "Post" = Relationship(back_populates="comments")
     author: "User" = Relationship(back_populates="comments")
-    replies: list["Comment"] = Relationship(
-        sa_relationship_kwargs={"remote_side": "Comment.id"}
-    )
 
-    created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
+
+class CommentCreate(CommentBase):
+    post_id: int
+
+
+class CommentRead(CommentBase):
+    id: int
+    post_id: int
+    author_id: int
+    created_at: dt.datetime
+    updated_at: dt.datetime

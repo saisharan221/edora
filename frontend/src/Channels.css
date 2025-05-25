@@ -275,4 +275,18 @@
   width: 1rem;
   height: 1rem;
   color: currentColor;
+}
+
+.channel-actions {
+  align-self: flex-end;
+  margin-top: auto;
+}
+
+.channel-owner {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 4px;
 } 
