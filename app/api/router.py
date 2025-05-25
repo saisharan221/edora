@@ -10,7 +10,7 @@ from app.api.posts    import router as posts_router
 # ─── Collect them into one router ─────────────────────────────────────────────
 api_router = APIRouter()
 api_router.include_router(auth_router)
-api_router.include_router(files_router, prefix="/files")
+api_router.include_router(files_router, prefix="/api/files")
 api_router.include_router(channels_router)
 api_router.include_router(posts_router)
 # api_router.include_router(resources_router, prefix="/resources")

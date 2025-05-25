@@ -28,15 +28,44 @@ function App() {
   const [points, setPoints] = useState(240);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
+  const [channelsVersion, setChannelsVersion] = useState(0);
+  const [searchResults, setSearchResults] = useState([]);
 
   // show only the Login form until onLogin() is called
   if (activeScene === 'login') {
     return <Login onLogin={() => setActiveScene('home')} />;
   }
 
-  const handleSearch = () => {
-    console.log(`Searching for "${searchQuery}" in ${searchType}s`);
-    setActiveScene('result');
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    const token = localStorage.getItem('access_token');
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+    try {
+      let results;
+      if (searchType === 'file') {
+        // Search posts (which contain files)
+        const response = await fetch(`${API}/posts/search?q=${encodeURIComponent(searchQuery)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Search failed');
+        results = await response.json();
+      } else if (searchType === 'channel') {
+        // Search channels
+        const response = await fetch(`${API}/channels/?q=${encodeURIComponent(searchQuery)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Search failed');
+        results = await response.json();
+      }
+
+      setSearchResults(results);
+      setActiveScene('result');
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('Search failed: ' + error.message);
+    }
   };
 
   const handleLogout = () => {
@@ -173,11 +202,11 @@ function App() {
           </div>
         </header>
 
-{activeScene === 'channels' && <Channels />}
+{activeScene === 'channels' && <Channels key={channelsVersion} />}
 {activeScene === 'upload'   && <Upload />}
-{activeScene === 'create'   && <Create />}
+{activeScene === 'create'   && <Create onChannelCreated={() => setChannelsVersion(v => v + 1)} />}
 {activeScene === 'result'   && (
-  <Result searchQuery={searchQuery} searchType={searchType} />
+  <Result searchQuery={searchQuery} searchType={searchType} results={searchResults} />
 )}
 {!['channels','upload','create','result'].includes(activeScene) && (
   <section className="dashboard">

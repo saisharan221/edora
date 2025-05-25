@@ -47,3 +47,19 @@ def list_posts(
     session: Session = Depends(get_session),
 ):
     return session.exec(select(Post)).all()
+
+@router.get(
+    "/search",
+    response_model=List[PostRead],
+)
+def search_posts(
+    q: str,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Search posts by title and content."""
+    query = select(Post).where(
+        (Post.title.ilike(f"%{q}%") | Post.content.ilike(f"%{q}%")) &
+        (Post.author_id == current.id)  # Only search user's own posts
+    )
+    return session.exec(query).all()

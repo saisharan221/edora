@@ -51,8 +51,12 @@ def create_channel(
 )
 def list_channels(
     session: Session = Depends(get_session),
+    current: User = Depends(current_user),
 ):
-    return session.exec(select(Channel)).all()
+    # Only return channels owned by the current user
+    return session.exec(
+        select(Channel).where(Channel.owner_id == current.id)
+    ).all()
 
 @router.get(
     "/{channel_id}/posts",

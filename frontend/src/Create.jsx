@@ -1,7 +1,7 @@
 // src/Create.jsx
 import React, { useState } from "react";
 
-export default function Create() {
+export default function Create({ onChannelCreated }) {
   const [name, setName] = useState("");
   const [bio,  setBio]  = useState("");
   const [error, setError] = useState("");
@@ -36,6 +36,7 @@ export default function Create() {
       setSuccess("🎉 Channel created!");
       setName("");
       setBio("");
+      onChannelCreated?.(); // Call the callback when channel is created
     }
   };
 
