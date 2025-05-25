@@ -1,6 +1,13 @@
 import React from 'react';
 import './PostDetail.css';
 
+/** Utility to format file size */
+function formatFileSize(size) {
+  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(2) + ' MB';
+  if (size >= 1024) return (size / 1024).toFixed(1) + ' KB';
+  return size + ' B';
+}
+
 function PostDetail({ post, onClose }) {
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -47,14 +54,26 @@ function PostDetail({ post, onClose }) {
                         className="file-preview-image"
                       />
                     ) : file.mime_type === 'application/pdf' ? (
-                      <iframe
-                        src={`${API}/files/${file.filename}`}
-                        title={file.filename.split('/').pop()}
-                        className="file-preview-pdf"
-                        width="100%"
-                        height="200px"
-                        style={{ border: 'none', borderRadius: '8px' }}
-                      />
+                      <>
+                        <iframe
+                          src={`${API}/files/${file.filename}`}
+                          title={file.filename.split('/').pop()}
+                          className="file-preview-pdf"
+                          width="100%"
+                          height="200px"
+                          style={{ border: 'none', borderRadius: '8px', background: '#fff' }}
+                        />
+                        <div style={{textAlign: 'center', marginTop: 8}}>
+                          <a
+                            href={`${API}/files/${file.filename}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="download-button"
+                          >
+                            Open PDF in new tab
+                          </a>
+                        </div>
+                      </>
                     ) : (
                       <div className="file-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -70,7 +89,7 @@ function PostDetail({ post, onClose }) {
                   <div className="file-info">
                     <span className="file-name">{file.filename.split('/').pop()}</span>
                     <span className="file-size">
-                      {(file.size / 1024).toFixed(1)} KB
+                      {formatFileSize(file.size)}
                     </span>
                     <a
                       href={`${API}/files/${file.filename}`}
