@@ -36,7 +36,13 @@ const Upload = () => {
       const result = await response.json();
 
       if (response.ok) {
-        setStatus(`✅ ${result.message} (${result.filename})`);
+          setStatus(`✅ ${result.message} (${result.filename})`);
+          // Clear form fields
+          setFile(null);
+          setTitle('');
+          setUrl('');
+          setDesc('');
+          fileInputRef.current.value = null; // clear actual file input
       } else {
         setStatus(`❌ Upload failed: ${result.detail}`);
       }
@@ -115,6 +121,14 @@ const Upload = () => {
       </div>
 
       <button className="upload-btn" onClick={handleUpload}>Upload</button>
+      {status && (
+        <p
+          className="upload-status"
+          style={{ color: status.startsWith('✅') ? 'green' : 'red' }}
+        >
+          {status}
+        </p>
+      )}
     </div>
   );
 };
