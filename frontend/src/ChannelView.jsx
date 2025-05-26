@@ -113,21 +113,23 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
           </svg>
           Back to Channels
         </button>
-        
+
         {channel && (
-          <div className="channel-info">
-            <h1 className="channel-title">{channel.name}</h1>
-            {channel.bio && <p className="channel-bio">{channel.bio}</p>}
-            <div className="channel-meta">
-              <span className="post-count">{posts.length} posts</span>
-              <span className="created-date">
-                Created {formatDate(channel.created_at)}
-              </span>
-              <button className="leave-channel-button" onClick={handleLeave} disabled={leaving}>
-                {leaving ? 'Leaving...' : 'Leave Channel'}
-              </button>
+          <>
+            <div className="channel-info">
+              <h1 className="channel-title">{channel.name}</h1>
+              {channel.bio && <p className="channel-bio">{channel.bio}</p>}
+              <div className="channel-meta">
+                <span className="post-count">{posts.length} posts</span>
+                <span className="created-date">
+                  Created {formatDate(channel.created_at)}
+                </span>
+              </div>
             </div>
-          </div>
+            <button className="leave-channel-button" onClick={handleLeave} disabled={leaving}>
+              {leaving ? 'Leaving...' : 'Leave Channel'}
+            </button>
+          </>
         )}
       </div>
 
