@@ -57,6 +57,14 @@ def list_channels(
     channels = session.exec(select(Channel)).all()
     result = []
     for ch in channels:
+        joined = bool(
+            session.exec(
+                select(channel_user_link).where(
+                    channel_user_link.c.channel_id == ch.id,
+                    channel_user_link.c.user_id == current.id
+                )
+            ).first()
+        )
         result.append({
             "id": ch.id,
             "name": ch.name,
@@ -65,7 +73,7 @@ def list_channels(
             "logo_filename": ch.logo_filename,
             "created_at": ch.created_at,
             "updated_at": ch.updated_at,
-            "joined": current in ch.users
+            "joined": joined
         })
     return result
 

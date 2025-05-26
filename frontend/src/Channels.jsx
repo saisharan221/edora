@@ -91,7 +91,15 @@ export default function Channels({ onChannelClick, onCreateClick, view }) {
       </div>
       <div className="channels-grid">
         {filteredChannels.map(ch => (
-          <div key={ch.id} className="channel-card">
+          <div
+            key={ch.id}
+            className="channel-card"
+            onClick={() => onChannelClick && onChannelClick(ch.id)}
+            style={{
+              cursor: 'pointer',
+              opacity: 1
+            }}
+          >
             <div className="channel-header">
               <h2 className="channel-name">{ch.name}</h2>
               {ch.bio && <p className="channel-bio">{ch.bio}</p>}
