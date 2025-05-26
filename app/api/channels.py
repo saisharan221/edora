@@ -143,3 +143,27 @@ def join_channel(
     session.exec(ins)
     session.commit()
     return {"message": "Joined channel"}
+
+
+@router.post("/{channel_id}/leave")
+def leave_channel(
+    channel_id: int,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    # Remove the user from the channel_user_link table
+    stmt = select(channel_user_link).where(
+        channel_user_link.c.channel_id == channel_id,
+        channel_user_link.c.user_id == current.id
+    )
+    link = session.exec(stmt).first()
+    if not link:
+        raise HTTPException(status_code=400, detail="Not a member")
+    session.exec(
+        channel_user_link.delete().where(
+            channel_user_link.c.channel_id == channel_id,
+            channel_user_link.c.user_id == current.id
+        )
+    )
+    session.commit()
+    return {"message": "Left channel"}

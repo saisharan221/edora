@@ -6,6 +6,7 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [leaving, setLeaving] = useState(false);
 
   const token = localStorage.getItem('access_token');
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -62,6 +63,22 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
     });
   };
 
+  const handleLeave = async () => {
+    setLeaving(true);
+    try {
+      const res = await fetch(`${API}/channels/${channelId}/leave`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to leave channel');
+      onBack(); // Go back to channels list
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLeaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="channel-view-container">
@@ -106,6 +123,9 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
               <span className="created-date">
                 Created {formatDate(channel.created_at)}
               </span>
+              <button className="leave-channel-button" onClick={handleLeave} disabled={leaving}>
+                {leaving ? 'Leaving...' : 'Leave Channel'}
+              </button>
             </div>
           </div>
         )}
