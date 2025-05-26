@@ -145,16 +145,6 @@ export default function Channels({ onChannelClick, onCreateClick }) {
                 {ch.bio && <p className="channel-bio">{ch.bio}</p>}
               </div>
               <div className="channel-meta">
-                <div className="channel-stats">
-                  <div className="stat-item">
-                    <ChannelIcon />
-                    <span>Channel</span>
-                  </div>
-                  <div className="stat-item">
-                    <PostIcon />
-                    <span>View Posts</span>
-                  </div>
-                </div>
                 <div className="channel-actions">
                   <span className="channel-owner">
                     {ch.owner_id === parseInt(localStorage.getItem('user_id')) ? 'Your Channel' : 'Public Channel'}

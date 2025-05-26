@@ -617,40 +617,69 @@ textarea::placeholder {
 /* Header Section */
 .home-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #6d7fc9 0%, #6a5fc7 100%);
+  border-radius: 32px;
+  box-shadow: 0 4px 24px 0 rgba(106,95,199,0.10);
+  position: relative;
+  padding: 3.5rem 0 2.5rem 0;
+  margin: 0rem 1.5rem 2rem 1.5rem;
+  border: none;
 }
 
 .welcome-section {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .welcome-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  /* Fallback for browsers that don't support background-clip */
-  color: #667eea;
+  color: #fff;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  margin-top: -1.2rem;
 }
 
 .welcome-subtitle {
   font-size: 1.125rem;
-  color: #6b7280;
+  color: #f3eaff;
   margin: 0;
   font-weight: 400;
 }
 
 .refresh-btn {
+  background: rgba(255,255,255,0.25);
+  border: none;
+  color: #4b4b6b;
+  box-shadow: 0 2px 8px rgba(106,95,199,0.10);
+  border-radius: 12px;
+  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  backdrop-filter: blur(6px);
+  outline: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+}
+
+.refresh-btn:hover, .refresh-btn:focus {
+  background: rgba(255,255,255,0.4);
+  color: #6a5fc7;
+  box-shadow: 0 4px 16px rgba(106,95,199,0.18);
 }
 
 /* Search Section */
@@ -979,4 +1008,11 @@ textarea::placeholder {
   .action-card {
     padding: 1.5rem;
   }
+}
+
+/* Only the 'Edora' part in white, rest in a slightly transparent white for contrast if needed */
+.edora-white {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 1px;
 }
