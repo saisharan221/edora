@@ -38,123 +38,85 @@ const EmptyIcon = () => (
   </svg>
 );
 
-export default function Channels({ onChannelClick, onCreateClick }) {
+export default function Channels({ onChannelClick, onCreateClick, view }) {
   const [channels, setChannels] = useState([]);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [joining, setJoining] = useState(null);
 
   const token = localStorage.getItem('access_token');
+  const userId = parseInt(localStorage.getItem('user_id'));
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-  // Fetch all channels
   useEffect(() => {
     setLoading(true);
     setError(null);
-    
-    // Fetch all channels
     fetch(`${API}/channels/`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        console.log('Fetched channels:', data);
-        setChannels(data);
-      })
-      .catch(err => {
-        console.error('Error fetching channels:', err);
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
+      .then(res => res.json())
+      .then(data => setChannels(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [joining, view]);
+
+  const handleJoin = async (channelId) => {
+    setJoining(channelId);
+    try {
+      const res = await fetch(`${API}/channels/${channelId}/join`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
       });
-  }, []);
-
-  const handleChannelClick = (channel) => {
-    if (onChannelClick) {
-      onChannelClick(channel.id);
+      if (!res.ok) throw new Error('Failed to join');
+      setJoining(null);
+    } catch (err) {
+      alert(err.message);
+      setJoining(null);
     }
   };
 
-  const handleCreateClick = () => {
-    if (onCreateClick) {
-      onCreateClick();
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="channels-container">
-        <div className="loading-container">
-          <LoadingIcon />
-          <p>Loading channels...</p>
-        </div>
-      </div>
-    );
+  let filteredChannels = channels;
+  if (view === 'your') {
+    filteredChannels = channels.filter(ch => ch.joined);
   }
 
-  if (error) {
-    return (
-      <div className="channels-container">
-        <div className="error-container">
-          <ErrorIcon />
-          <p className="error-message">Error: {error}</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="channels-container">
       <div className="channels-header">
-        <h1 className="channels-title">All Channels</h1>
-        <button 
-          className="create-channel-button"
-          onClick={handleCreateClick}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Create Channel
-        </button>
+        <h1 className="channels-title">{view === 'your' ? 'Your Channels' : 'All Channels'}</h1>
+        <button className="create-channel-button" onClick={onCreateClick}>Create Channel</button>
       </div>
-
-      {channels.length === 0 ? (
-        <div className="empty-state">
-          <EmptyIcon />
-          <p className="empty-message">No channels yet. Create one to get started!</p>
-          <button 
-            className="create-channel-button"
-            onClick={handleCreateClick}
-          >
-            Create Your First Channel
-          </button>
-        </div>
-      ) : (
-        <div className="channels-grid">
-          {channels.map(ch => (
-            <div
-              key={ch.id}
-              className="channel-card"
-              onClick={() => handleChannelClick(ch)}
-            >
-              <div className="channel-header">
-                <h2 className="channel-name">{ch.name}</h2>
-                {ch.bio && <p className="channel-bio">{ch.bio}</p>}
-              </div>
-              <div className="channel-meta">
-                <div className="channel-actions">
+      <div className="channels-grid">
+        {filteredChannels.map(ch => (
+          <div key={ch.id} className="channel-card">
+            <div className="channel-header">
+              <h2 className="channel-name">{ch.name}</h2>
+              {ch.bio && <p className="channel-bio">{ch.bio}</p>}
+            </div>
+            <div className="channel-meta">
+              <div className="channel-actions">
+                {ch.joined ? (
                   <span className="channel-owner">
-                    {ch.owner_id === parseInt(localStorage.getItem('user_id')) ? 'Your Channel' : 'Public Channel'}
+                    {ch.owner_id === userId ? 'Your Channel' : 'Joined'}
                   </span>
-                </div>
+                ) : (
+                  <button
+                    className="create-channel-button"
+                    style={{ padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 8 }}
+                    disabled={joining === ch.id}
+                    onClick={() => handleJoin(ch.id)}
+                  >
+                    {joining === ch.id ? 'Joining...' : 'Join'}
+                  </button>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from .association_tables import channel_user_link
 
 
 
@@ -37,3 +38,7 @@ class User(UserBase, table=True):
     comments: List["Comment"] = Relationship(back_populates="author")
     post_reactions: List["PostReaction"] = Relationship(back_populates="user")
     saved_posts: List["SavedPost"] = Relationship(back_populates="user")
+    joined_channels: List["Channel"] = Relationship(
+        back_populates="users",
+        sa_relationship_kwargs={"secondary": "channel_user_link"}
+    )

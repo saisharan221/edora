@@ -36,6 +36,10 @@ function App() {
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [previousScene, setPreviousScene] = useState(null);
 
+  // New state for channels dropdown
+  const [channelsDropdownOpen, setChannelsDropdownOpen] = useState(false);
+  const [channelsView, setChannelsView] = useState('all'); // 'all' or 'your'
+
   // Check authentication status on app load
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -214,16 +218,43 @@ function App() {
               <span>Home</span>
             </div>
           </div>
-          {/* Channels */}
-          <div
-            role="button"
-            className={`clickable-link ${activeScene === 'channels' || activeScene === 'channel-view' || activeScene === 'post-view' ? 'active' : ''}`}
-            onClick={() => setActiveScene('channels')}
-          >
-            <div className="link-content">
-              <img src={channelImage} alt="channels" className="icon" />
-              <span>Channels</span>
+          {/* Channels with dropdown */}
+          <div>
+            <div
+              role="button"
+              className={`clickable-link ${['channels','channel-view','post-view'].includes(activeScene) ? 'active' : ''}`}
+              onClick={() => {
+                setActiveScene('channels');
+                setChannelsDropdownOpen((open) => !open);
+              }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            >
+              <div className="link-content">
+                <img src={channelImage} alt="channels" className="icon" />
+                <span>Channels</span>
+              </div>
+              <span style={{ marginLeft: 'auto', fontSize: '1.1em', transition: 'transform 0.2s', transform: channelsDropdownOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>&#9654;</span>
             </div>
+            {channelsDropdownOpen && (
+              <div style={{ marginLeft: 36, marginTop: 4 }}>
+                <div
+                  role="button"
+                  className={`clickable-link ${channelsView === 'your' ? 'active' : ''}`}
+                  style={{ fontSize: '0.98em', padding: '6px 0 6px 10px' }}
+                  onClick={() => { setChannelsView('your'); setActiveScene('channels'); }}
+                >
+                  Your Channels
+                </div>
+                <div
+                  role="button"
+                  className={`clickable-link ${channelsView === 'all' ? 'active' : ''}`}
+                  style={{ fontSize: '0.98em', padding: '6px 0 6px 10px' }}
+                  onClick={() => { setChannelsView('all'); setActiveScene('channels'); }}
+                >
+                  All Channels
+                </div>
+              </div>
+            )}
           </div>
           {/* Messages */}
           <div
@@ -597,6 +628,7 @@ function App() {
             key={channelsVersion} 
             onChannelClick={handleChannelClick}
             onCreateClick={() => setActiveScene('create')}
+            view={channelsView}
           />
         )}
         {activeScene === 'channel-view' && selectedChannelId && (
