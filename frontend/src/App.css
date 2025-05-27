@@ -29,15 +29,19 @@
 }
 
 .edora-logo {
-  width: 80%;
+  width: 90%;
+  max-width: 240px;
   height: auto;
-  margin-bottom: 30px;
-  padding: 10px;
+  margin-bottom: 12px;
+  padding: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  /* box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); */
   transition: all 0.3s ease;
   object-fit: contain;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .edora-logo:hover {
@@ -88,7 +92,7 @@
 /* Main content */
 .main-content {
   flex: 1;
-  padding: 20px;
+  padding: 60px 20px 20px 20px;
   background: #f9f9f9;
   overflow-y: auto;
 }
@@ -99,14 +103,14 @@
 }
 
 .search-bar-container {
+  flex: 0 1 auto;
+  width: 600px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto 1rem auto;
   background: #f8fafc;
-  border-radius: 9999px;
-  box-shadow: 0 2px 12px rgba(60, 120, 240, 0.07);
+  border-radius: 24px !important;
+  box-shadow: 0 2px 12px rgba(60, 120, 240, 0.07), 0 1.5px 8px rgba(60, 120, 240, 0.04);
   border: 1.5px solid #dbeafe;
   padding: 0.25rem 0.75rem;
   transition: box-shadow 0.2s, border-color 0.2s;
@@ -120,14 +124,16 @@
 }
 
 .search-bar-input {
+  width: 100%;
+  min-width: 0;
   flex: 1;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 1.05rem;
-  padding: 0.5rem 0.5rem;
+  font-size: 1.08rem;
+  padding: 0.6rem 0.8rem;
   color: #22223b;
-  border-radius: 9999px;
+  border-radius: 18px !important;
 }
 
 .search-bar-input::placeholder {
@@ -612,6 +618,7 @@ textarea::placeholder {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0;
+  padding-left: 0;
 }
 
 /* Header Section */
@@ -684,11 +691,26 @@ textarea::placeholder {
 
 /* Search Section */
 .search-section {
-  margin-bottom: 3rem;
-  padding: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+  margin-bottom: 2rem;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+.top-filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 /* Quick Actions Section */
@@ -1015,4 +1037,48 @@ textarea::placeholder {
   color: #fff;
   font-weight: 800;
   letter-spacing: 1px;
+}
+
+.segmented-toggle {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  padding: 2px 3px;
+  gap: 0.25rem;
+  box-shadow: 0 4px 16px rgba(60,120,240,0.13);
+  height: 36px;
+  align-items: center;
+  margin-left: 0;
+}
+.segmented-toggle label {
+  cursor: pointer;
+  padding: 0.25rem 0.8rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  color: #374151;
+  background: none;
+  transition: background 0.2s, color 0.2s;
+  position: relative;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+.segmented-toggle label.selected {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(60,120,240,0.13);
+}
+.segmented-toggle input[type="radio"] {
+  display: none;
+}
+
+.searchbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  width: 100%;
+  margin-bottom: 0;
+  padding-left: 0;
 }

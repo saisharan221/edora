@@ -40,6 +40,12 @@ function Result({ searchQuery, searchType, results = [], onBack }) {
   // Otherwise show the search results
   return (
     <div className="result-container">
+      <button className="back-button" onClick={onBack} style={{marginBottom: '1rem'}}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: 6}}>
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </button>
       <div className="result-header">
         <h2>Search Results for "{searchQuery}"</h2>
       </div>

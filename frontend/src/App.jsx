@@ -205,7 +205,7 @@ function App() {
   return (
     <div className="app">
       <aside className="sidebar">
-        <img src={edoraImage} alt="edora" className="edora-logo" />
+        <img src="/edora-logo.svg" alt="Edora Logo" className="edora-logo" />
         <nav className="nav-links">
           {/* Home */}
           <div
@@ -351,6 +351,62 @@ function App() {
       </aside>
 
       <main className="main-content">
+        {/* Filter controls at the top, next to sidebar */}
+        {(activeScene === 'home' || activeScene === 'result') && (
+          <div className="searchbar-row" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="segmented-toggle">
+              <label className={searchType === 'file' ? 'selected' : ''}>
+                <input
+                  type="radio"
+                  name="searchType"
+                  value="file"
+                  checked={searchType === 'file'}
+                  onChange={(e) => setSearchType(e.target.value)}
+                />
+                Files
+              </label>
+              <label className={searchType === 'channel' ? 'selected' : ''}>
+                <input
+                  type="radio"
+                  name="searchType"
+                  value="channel"
+                  checked={searchType === 'channel'}
+                  onChange={(e) => setSearchType(e.target.value)}
+                />
+                Channels
+              </label>
+            </div>
+            <div className="search-bar-container" style={{ flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Search for files, channels..."
+                className="search-bar-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <div className="search-bar-icon" onClick={handleSearch}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </div>
+            </div>
+            {(activeScene === 'home' || activeScene === 'result') && (
+              <button 
+                onClick={fetchHomePageData}
+                className="dashboard-button secondary refresh-btn"
+                style={{ position: 'static', marginLeft: '8px', marginTop: 0 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4a9 9 0 0 1-14.85 3.36L23 14"/>
+                </svg>
+                Refresh
+              </button>
+            )}
+          </div>
+        )}
+
         {activeScene === 'home' && (
           <div className="home-container">
             {/* Header Section */}
@@ -358,57 +414,6 @@ function App() {
               <div className="welcome-section">
                 <h1 className="welcome-title">Welcome to Edora</h1>
                 <p className="welcome-subtitle">Your collaborative document sharing platform</p>
-              </div>
-              <button 
-                onClick={fetchHomePageData}
-                className="dashboard-button secondary refresh-btn"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4a9 9 0 0 1-14.85 3.36L23 14"/>
-                </svg>
-                Refresh
-              </button>
-            </div>
-
-            {/* Search Section */}
-            <div className="search-section">
-              <div className="search-bar-container">
-                <input
-                  type="text"
-                  placeholder="Search for files, channels..."
-                  className="search-bar-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                />
-                <div className="search-bar-icon" onClick={handleSearch}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                  </svg>
-                </div>
-              </div>
-              <div className="filter-controls">
-                <label>
-                  <input
-                    type="radio"
-                    name="searchType"
-                    value="file"
-                    checked={searchType === 'file'}
-                    onChange={(e) => setSearchType(e.target.value)}
-                  />
-                  Files
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="searchType"
-                    value="channel"
-                    checked={searchType === 'channel'}
-                    onChange={(e) => setSearchType(e.target.value)}
-                  />
-                  Channels
-                </label>
               </div>
             </div>
 

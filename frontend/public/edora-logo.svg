@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="220" height="60" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="edora-gradient" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#667eea"/>
+      <stop offset="1" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+  <!-- Minimal geometric E icon -->
+  <g>
+    <rect x="8" y="8" width="44" height="44" rx="12" fill="url(#edora-gradient)"/>
+    <rect x="20" y="20" width="20" height="4" rx="2" fill="#fff"/>
+    <rect x="20" y="28" width="16" height="4" rx="2" fill="#fff"/>
+    <rect x="20" y="36" width="12" height="4" rx="2" fill="#fff"/>
+  </g>
+  <!-- Edora wordmark -->
+  <text x="64" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="bold" fill="#22223b">Edora</text>
+</svg> 
