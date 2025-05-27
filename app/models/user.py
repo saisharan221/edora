@@ -19,6 +19,7 @@ class UserBase(SQLModel):
     email: EmailStr = Field(index=True, unique=True, nullable=False)
     is_active: bool = True
     is_superuser: bool = False
+    role: str = Field(default="user", max_length=32)  # "user", "moderator", "admin"
 
 
 class User(UserBase, table=True):

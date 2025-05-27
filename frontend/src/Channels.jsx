@@ -38,7 +38,7 @@ const EmptyIcon = () => (
   </svg>
 );
 
-export default function Channels({ onChannelClick, onCreateClick, view }) {
+export default function Channels({ onChannelClick, onCreateClick, view, userRole }) {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,6 +75,20 @@ export default function Channels({ onChannelClick, onCreateClick, view }) {
     }
   };
 
+  const handleDelete = async (channelId) => {
+    if (!window.confirm('Are you sure you want to delete this channel?')) return;
+    try {
+      const res = await fetch(`${API}/channels/${channelId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete channel');
+      setChannels(channels.filter(ch => ch.id !== channelId));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   let filteredChannels = channels;
   if (view === 'your') {
     filteredChannels = channels.filter(ch => ch.joined);
@@ -97,7 +111,8 @@ export default function Channels({ onChannelClick, onCreateClick, view }) {
             onClick={() => onChannelClick && onChannelClick(ch.id)}
             style={{
               cursor: 'pointer',
-              opacity: 1
+              opacity: 1,
+              position: 'relative',
             }}
           >
             <div className="channel-header">
@@ -113,7 +128,7 @@ export default function Channels({ onChannelClick, onCreateClick, view }) {
                 ) : (
                   <button
                     className="create-channel-button"
-                    style={{ padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 8 }}
+                    style={{ padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 12 }}
                     disabled={joining === ch.id}
                     onClick={() => handleJoin(ch.id)}
                   >
@@ -122,6 +137,27 @@ export default function Channels({ onChannelClick, onCreateClick, view }) {
                 )}
               </div>
             </div>
+            {(userRole === 'moderator' || userRole === 'admin') && (
+              <button
+                className="delete-channel-button gradient-red"
+                style={{
+                  position: 'absolute',
+                  right: 16,
+                  bottom: 16,
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: 12,
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: 500,
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(255,0,0,0.08)'
+                }}
+                onClick={e => { e.stopPropagation(); handleDelete(ch.id); }}
+              >
+                Delete
+              </button>
+            )}
           </div>
         ))}
       </div>

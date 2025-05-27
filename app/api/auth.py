@@ -25,6 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 class RegisterRequest(BaseModel):
     email: str
     password: str
+    role: str = "user"  # allow role to be set for dev/admin
 
 
 class RefreshRequest(BaseModel):
@@ -59,11 +60,11 @@ async def current_user(token: str = Depends(oauth2_scheme),
 def register(request: RegisterRequest, session: Session = Depends(db)):
     if session.exec(select(User).where(User.email == request.email)).first():
         raise HTTPException(400, "email already registered")
-    user = User(email=request.email, hashed_password=hash_password(request.password))
+    user = User(email=request.email, hashed_password=hash_password(request.password), role=request.role)
     session.add(user)
     session.commit()
     session.refresh(user)
-    return {"id": user.id, "email": user.email}
+    return {"id": user.id, "email": user.email, "role": user.role}
 
 
 @router.post("/login")
@@ -118,4 +119,9 @@ def refresh(request: RefreshRequest, session: Session = Depends(db)):
 
 @router.get("/me")
 def me(user: User = Depends(current_user)):
-    return {"id": user.id, "email": user.email, "is_superuser": user.is_superuser}
+    return {
+        "id": user.id,
+        "email": user.email,
+        "is_superuser": user.is_superuser,
+        "role": user.role
+    }

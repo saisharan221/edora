@@ -9,6 +9,7 @@ from app.models.post import Post, PostCreate, PostRead
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.channel import Channel
+from app.core.dependencies import require_moderator
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -89,3 +90,12 @@ def get_post(
             detail="Post not found"
         )
     return post
+
+@router.delete("/{post_id}")
+def delete_post(post_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
+    post = session.get(Post, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    session.delete(post)
+    session.commit()
+    return {"ok": True}

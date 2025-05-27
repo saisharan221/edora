@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './PostDetailView.css';
 
-export default function PostDetailView({ postId, onBack, onSaveChange }) {
+export default function PostDetailView({ postId, onBack, onSaveChange, userRole }) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -228,6 +228,20 @@ export default function PostDetailView({ postId, onBack, onSaveChange }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    try {
+      const response = await fetch(`${API}/posts/${postId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to delete post');
+      if (onBack) onBack();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -300,7 +314,12 @@ export default function PostDetailView({ postId, onBack, onSaveChange }) {
       <div className="post-detail-content">
         <article className="post-article">
           <header className="post-header">
-            <h1 className="post-title">{post.title}</h1>
+            <h1 className="post-title">
+              {post.title}
+              {(userRole === 'moderator' || userRole === 'admin') && (
+                <button onClick={handleDelete} style={{ color: 'red', marginLeft: 16, fontSize: '1rem', background: 'none', border: 'none', cursor: 'pointer' }}>Delete Post</button>
+              )}
+            </h1>
             <div className="post-meta">
               <div className="author-info">
                 <div className="author-avatar"></div>

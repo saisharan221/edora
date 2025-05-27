@@ -23,6 +23,7 @@ import SavedPosts from './SavedPosts';
 function App() {
   const [activeScene, setActiveScene] = useState('auth');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState('user');
   const [points, setPoints] = useState(240);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
@@ -60,7 +61,9 @@ function App() {
       });
       
       if (response.ok) {
+        const data = await response.json();
         setIsAuthenticated(true);
+        setUserRole(data.role || 'user');
         setActiveScene('home');
         // Fetch home page data
         fetchHomePageData();
@@ -70,6 +73,7 @@ function App() {
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_id');
         setIsAuthenticated(false);
+        setUserRole('user');
         setActiveScene('auth');
       }
     } catch (error) {
@@ -78,6 +82,7 @@ function App() {
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_id');
       setIsAuthenticated(false);
+      setUserRole('user');
       setActiveScene('auth');
     }
   };
@@ -112,6 +117,15 @@ function App() {
   const handleLogin = () => {
     setIsAuthenticated(true);
     setActiveScene('home');
+    // Fetch user role after login
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setUserRole(data.role || 'user'));
+    }
     fetchHomePageData();
   };
 
@@ -634,6 +648,7 @@ function App() {
             onChannelClick={handleChannelClick}
             onCreateClick={() => setActiveScene('create')}
             view={channelsView}
+            userRole={userRole}
           />
         )}
         {activeScene === 'channel-view' && selectedChannelId && (
@@ -648,6 +663,7 @@ function App() {
             postId={selectedPostId}
             onBack={handleBackFromPost}
             onSaveChange={fetchHomePageData}
+            userRole={userRole}
           />
         )}
         {activeScene === 'saved' && (

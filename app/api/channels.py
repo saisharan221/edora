@@ -10,6 +10,7 @@ from app.models.channel import Channel, ChannelCreate, ChannelRead
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.association_tables import channel_user_link
+from app.core.dependencies import require_moderator
 
 router = APIRouter(prefix="/channels", tags=["channels"])
 
@@ -167,3 +168,13 @@ def leave_channel(
     )
     session.commit()
     return {"message": "Left channel"}
+
+
+@router.delete("/{channel_id}")
+def delete_channel(channel_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+    session.delete(channel)
+    session.commit()
+    return {"ok": True}
