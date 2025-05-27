@@ -1,7 +1,7 @@
 # app/api/channels.py
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select, insert
 from app.api.posts import PostRead, Post  
 
@@ -56,6 +56,44 @@ def list_channels(
     current: User = Depends(current_user),
 ):
     channels = session.exec(select(Channel)).all()
+    result = []
+    for ch in channels:
+        joined = bool(
+            session.exec(
+                select(channel_user_link).where(
+                    channel_user_link.c.channel_id == ch.id,
+                    channel_user_link.c.user_id == current.id
+                )
+            ).first()
+        )
+        result.append({
+            "id": ch.id,
+            "name": ch.name,
+            "bio": ch.bio,
+            "owner_id": ch.owner_id,
+            "logo_filename": ch.logo_filename,
+            "created_at": ch.created_at,
+            "updated_at": ch.updated_at,
+            "joined": joined
+        })
+    return result
+
+
+@router.get(
+    "/search",
+    response_model=List[dict],
+)
+def search_channels(
+    q: str = Query(..., min_length=1),
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    # Search channels by name or bio
+    channels = session.exec(
+        select(Channel).where(
+            Channel.name.ilike(f"%{q}%") | Channel.bio.ilike(f"%{q}%")
+        )
+    ).all()
     result = []
     for ch in channels:
         joined = bool(

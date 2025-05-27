@@ -1,4 +1,4 @@
-# Changes for Join/Leave Channel Feature & ChannelView UI Improvements
+# Changes for Join/Leave Channel Feature & ChannelView UI Improvements May 26
 
 ## Backend (FastAPI)
 

@@ -26,6 +26,7 @@ function App() {
   const [userRole, setUserRole] = useState('user');
   const [points, setPoints] = useState(240);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastSearchedQuery, setLastSearchedQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
   const [channelsVersion, setChannelsVersion] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
@@ -200,8 +201,8 @@ function App() {
         if (!response.ok) throw new Error('Search failed');
         results = await response.json();
       } else if (searchType === 'channel') {
-        // Search channels
-        const response = await fetch(`${API}/channels/?q=${encodeURIComponent(searchQuery)}`, {
+        // Search channels (new endpoint)
+        const response = await fetch(`${API}/channels/search?q=${encodeURIComponent(searchQuery)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Search failed');
@@ -209,6 +210,7 @@ function App() {
       }
 
       setSearchResults(results);
+      setLastSearchedQuery(searchQuery);
       setActiveScene('result');
     } catch (error) {
       console.error('Search error:', error);
@@ -357,6 +359,9 @@ function App() {
         </div>
 
         <div className="user-profile">
+          {(userRole === 'moderator' || userRole === 'admin') && (
+            <div className="moderator-label">Moderator</div>
+          )}
           <div className="points-display">
             <img src={coinsImage} alt="coins" className="coins-icon" />
             <span>{points} points</span>
@@ -406,7 +411,18 @@ function App() {
                 </svg>
               </div>
             </div>
-            {(activeScene === 'home' || activeScene === 'result') && (
+            {(activeScene === 'result') ? (
+              <button 
+                onClick={() => setActiveScene('home')}
+                className="dashboard-button secondary refresh-btn"
+                style={{ position: 'static', marginLeft: '8px', marginTop: 0 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+            ) : (
               <button 
                 onClick={fetchHomePageData}
                 className="dashboard-button secondary refresh-btn"
@@ -674,10 +690,15 @@ function App() {
         )}
         {activeScene === 'result' && (
           <Result
-            searchQuery={searchQuery}
+            searchQuery={lastSearchedQuery}
             searchType={searchType}
             results={searchResults}
             onBack={() => setActiveScene('home')}
+            onChannelClick={(channelId) => {
+              setSelectedChannelId(channelId);
+              setSelectedPostId(null);
+              setActiveScene('channel-view');
+            }}
           />
         )}
 
