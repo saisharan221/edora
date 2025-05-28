@@ -13,8 +13,15 @@ class ChannelBase(SQLModel):
     name: str = Field(index=True, max_length=120)
     bio: Optional[str] = None
 
+
 class ChannelCreate(ChannelBase):
     pass
+
+
+class ChannelUpdate(SQLModel):
+    name: Optional[str] = Field(default=None, max_length=120)
+    bio: Optional[str] = None
+
 
 class ChannelRead(ChannelBase):
     id: int
@@ -36,7 +43,9 @@ class Channel(SQLModel, table=True):
     owner_id: int = Field(foreign_key="user.id")
     owner: "User" = Relationship(back_populates="channels")
 
-    created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
+    created_at: dt.datetime = Field(
+        default_factory=dt.datetime.utcnow, nullable=False
+    )
     updated_at: dt.datetime = Field(
         default_factory=dt.datetime.utcnow,
         sa_column_kwargs={"onupdate": dt.datetime.utcnow},

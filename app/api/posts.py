@@ -5,11 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from app.db import get_session
-from app.models.post import Post, PostCreate, PostRead
+from app.models.post import Post, PostCreate, PostRead, PostUpdate
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.channel import Channel
-from app.core.dependencies import require_moderator
+from app.core.permissions import (
+    require_post_edit_permission,
+    require_post_delete_permission
+)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -55,8 +58,19 @@ def create_post(
 )
 def list_posts(
     session: Session = Depends(get_session),
+    current: User = Depends(current_user),
 ):
-    return session.exec(select(Post)).all()
+    posts = session.exec(select(Post)).all()
+    # Add permission flags to each post
+    result = []
+    for post in posts:
+        post_dict = post.dict()
+        can_edit = current.role == "admin" or post.author_id == current.id
+        can_delete = current.role == "admin" or post.author_id == current.id
+        post_dict["can_edit"] = can_edit
+        post_dict["can_delete"] = can_delete
+        result.append(post_dict)
+    return result
 
 @router.get(
     "/search",
@@ -71,7 +85,17 @@ def search_posts(
     query = select(Post).where(
         Post.title.ilike(f"%{q}%") | Post.content.ilike(f"%{q}%")
     )
-    return session.exec(query).all()
+    posts = session.exec(query).all()
+    # Add permission flags to each post
+    result = []
+    for post in posts:
+        post_dict = post.dict()
+        can_edit = current.role == "admin" or post.author_id == current.id
+        can_delete = current.role == "admin" or post.author_id == current.id
+        post_dict["can_edit"] = can_edit
+        post_dict["can_delete"] = can_delete
+        result.append(post_dict)
+    return result
 
 @router.get(
     "/{post_id}",
@@ -91,11 +115,69 @@ def get_post(
         )
     return post
 
-@router.delete("/{post_id}")
-def delete_post(post_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
+@router.put(
+    "/{post_id}",
+    response_model=PostRead,
+)
+def update_post(
+    post_id: int,
+    payload: PostUpdate,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Update a post. Only the author or admin can edit."""
     post = session.get(Post, post_id)
     if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+        )
+    
+    # Check permissions
+    require_post_edit_permission(current, post)
+    
+    # Check if new title is unique in the channel (if title is being changed)
+    if payload.title and payload.title != post.title:
+        exists = session.exec(
+            select(Post).where(
+                Post.title == payload.title,
+                Post.channel_id == post.channel_id,
+                Post.id != post.id  # Exclude current post
+            )
+        ).first()
+        if exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Post with that title already exists in this channel",
+            )
+    
+    # Update fields
+    update_data = payload.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(post, field, value)
+    
+    session.add(post)
+    session.commit()
+    session.refresh(post)
+    return post
+
+@router.delete("/{post_id}")
+def delete_post(
+    post_id: int,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Delete a post. Only the author or admin can delete."""
+    post = session.get(Post, post_id)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+        )
+    
+    # Check permissions
+    require_post_delete_permission(current, post)
+    
     session.delete(post)
     session.commit()
-    return {"ok": True}
+    return {"message": "Post deleted successfully"}

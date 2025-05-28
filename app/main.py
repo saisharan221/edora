@@ -5,12 +5,11 @@ from app.db import init_db
 from fastapi.staticfiles import StaticFiles
 
 
-
 app = FastAPI(title="Edora API")
 
 app.mount(
     "/files",
-    StaticFiles(directory="uploads"),   # ← make sure this matches your UPLOAD_DIR
+    StaticFiles(directory="app/uploads"),   # Updated to match UPLOAD_DIR
     name="files",
 )
 

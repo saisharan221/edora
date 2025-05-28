@@ -1,16 +1,17 @@
-version: "3.8"
-
 services:
   api:
     build:
       context: .
-      dockerfile: ./app/Dockerfile
+      dockerfile: ./app/dockerfile
     volumes:
-      - ./app:/app/app                # your code
-      - ./data/uploads:/app/app/uploads  # persistent uploads
+      - ./app:/app/app                # your code (bidirectional sync)
+      - ./data/uploads:/app/app/uploads  # persistent uploads (bidirectional sync)
+      - ./data:/app/data              # database and other data (bidirectional sync)
       - ./requirements.txt:/app/requirements.txt:ro
     ports:
       - "8000:8000"
+    env_file:
+      - docker.env
     environment:
       - DATABASE_URL=sqlite:///./data/app.db
     depends_on:
@@ -19,15 +20,25 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+      - ./frontend/src:/app/src       # source code (bidirectional sync)
+      - ./frontend/public:/app/public # public assets including icons (bidirectional sync)
+      - ./frontend/package.json:/app/package.json:ro
+      - ./frontend/package-lock.json:/app/package-lock.json:ro
+      - ./frontend/vite.config.js:/app/vite.config.js:ro
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js:ro
+      - ./frontend/postcss.config.js:/app/postcss.config.js:ro
+      - ./frontend/eslint.config.js:/app/eslint.config.js:ro
+      - ./frontend/index.html:/app/index.html:ro
+      - frontend_node_modules:/app/node_modules  # named volume for node_modules
     ports:
       - "5173:5173"
+    env_file:
+      - docker.env
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - VITE_API_URL=http://api:8000      # if you’ll call the API by service name
+      - VITE_API_URL=http://localhost:8000  # API accessible from host
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
     depends_on:
       - api
@@ -36,6 +47,9 @@ services:
     image: redis:7
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data              # persistent Redis data
 
 volumes:
   frontend_node_modules:
+  redis_data:

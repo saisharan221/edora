@@ -6,11 +6,16 @@ from sqlmodel import Session, select, insert
 from app.api.posts import PostRead, Post  
 
 from app.db import get_session
-from app.models.channel import Channel, ChannelCreate, ChannelRead
+from app.models.channel import (
+    Channel, ChannelCreate, ChannelRead, ChannelUpdate
+)
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.association_tables import channel_user_link
-from app.core.dependencies import require_moderator
+from app.core.permissions import (
+    require_channel_edit_permission,
+    require_channel_delete_permission
+)
 
 router = APIRouter(prefix="/channels", tags=["channels"])
 
@@ -66,6 +71,8 @@ def list_channels(
                 )
             ).first()
         )
+        can_edit = current.role == "admin" or ch.owner_id == current.id
+        can_delete = current.role == "admin" or ch.owner_id == current.id
         result.append({
             "id": ch.id,
             "name": ch.name,
@@ -74,7 +81,9 @@ def list_channels(
             "logo_filename": ch.logo_filename,
             "created_at": ch.created_at,
             "updated_at": ch.updated_at,
-            "joined": joined
+            "joined": joined,
+            "can_edit": can_edit,
+            "can_delete": can_delete,
         })
     return result
 
@@ -104,6 +113,8 @@ def search_channels(
                 )
             ).first()
         )
+        can_edit = current.role == "admin" or ch.owner_id == current.id
+        can_delete = current.role == "admin" or ch.owner_id == current.id
         result.append({
             "id": ch.id,
             "name": ch.name,
@@ -112,7 +123,9 @@ def search_channels(
             "logo_filename": ch.logo_filename,
             "created_at": ch.created_at,
             "updated_at": ch.updated_at,
-            "joined": joined
+            "joined": joined,
+            "can_edit": can_edit,
+            "can_delete": can_delete,
         })
     return result
 
@@ -133,6 +146,49 @@ def get_channel(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Channel not found"
         )
+    return channel
+
+
+@router.put(
+    "/{channel_id}",
+    response_model=ChannelRead,
+)
+def update_channel(
+    channel_id: int,
+    payload: ChannelUpdate,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Update a channel. Only the owner or admin can edit."""
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Channel not found"
+        )
+    
+    # Check permissions
+    require_channel_edit_permission(current, channel)
+    
+    # Check if new name is unique (if name is being changed)
+    if payload.name and payload.name != channel.name:
+        exists = session.exec(
+            select(Channel).where(Channel.name == payload.name)
+        ).first()
+        if exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Channel name already taken",
+            )
+    
+    # Update fields
+    update_data = payload.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(channel, field, value)
+    
+    session.add(channel)
+    session.commit()
+    session.refresh(channel)
     return channel
 
 
@@ -170,15 +226,17 @@ def join_channel(
     channel = session.get(Channel, channel_id)
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
-    # Check if a row already exists in the association table (channel_user_link) for (channel_id, current.id)
+    # Check if already joined
     stmt = select(channel_user_link).where(
         channel_user_link.c.channel_id == channel_id,
         channel_user_link.c.user_id == current.id
     )
     if session.exec(stmt).first():
         raise HTTPException(status_code=400, detail="Already joined")
-    # Insert a new row into channel_user_link (using insert(...).values(...))
-    ins = insert(channel_user_link).values(channel_id=channel_id, user_id=current.id)
+    # Insert new membership
+    ins = insert(channel_user_link).values(
+        channel_id=channel_id, user_id=current.id
+    )
     session.exec(ins)
     session.commit()
     return {"message": "Joined channel"}
@@ -198,21 +256,35 @@ def leave_channel(
     link = session.exec(stmt).first()
     if not link:
         raise HTTPException(status_code=400, detail="Not a member")
-    session.exec(
-        channel_user_link.delete().where(
-            channel_user_link.c.channel_id == channel_id,
-            channel_user_link.c.user_id == current.id
-        )
+    
+    # Delete the link
+    from sqlmodel import delete
+    del_stmt = delete(channel_user_link).where(
+        channel_user_link.c.channel_id == channel_id,
+        channel_user_link.c.user_id == current.id
     )
+    session.exec(del_stmt)
     session.commit()
     return {"message": "Left channel"}
 
 
 @router.delete("/{channel_id}")
-def delete_channel(channel_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
+def delete_channel(
+    channel_id: int,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    """Delete a channel. Only the owner or admin can delete."""
     channel = session.get(Channel, channel_id)
     if not channel:
-        raise HTTPException(status_code=404, detail="Channel not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Channel not found"
+        )
+    
+    # Check permissions
+    require_channel_delete_permission(current, channel)
+    
     session.delete(channel)
     session.commit()
-    return {"ok": True}
+    return {"message": "Channel deleted successfully"}

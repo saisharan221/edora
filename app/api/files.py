@@ -8,13 +8,13 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlmodel import Session
 
 from app.database import engine
-from app.models import MediaFile
 from app.db import get_session
 from app.models.media_file import MediaFile  
 from app.api.auth import current_user, User  # reuse auth dependency
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+# Update upload directory to match Docker volume mount
+UPLOAD_DIR = Path("app/uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter()
 
@@ -60,6 +60,7 @@ async def upload_files(
         session.refresh(mf)  # get the DB id
 
     return saved
+
 
 @router.get("/{file_id}")
 def serve_file(file_id: int, session: Session = Depends(get_session)):

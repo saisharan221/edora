@@ -37,7 +37,7 @@ class Post(PostBase, table=True):
         sa_column_kwargs={"onupdate": dt.datetime.utcnow},
         nullable=False,
     )
-    
+
     # Relationships
     channel: "Channel" = Relationship(back_populates="posts")
     author: "User" = Relationship(back_populates="posts")
@@ -53,6 +53,11 @@ class Post(PostBase, table=True):
 
 class PostCreate(PostBase):
     channel_id: int
+
+
+class PostUpdate(SQLModel):
+    title: Optional[str] = Field(default=None, max_length=200)
+    content: Optional[str] = Field(default=None, max_length=10000)
 
 
 class MediaFileRead(SQLModel):

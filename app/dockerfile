@@ -3,6 +3,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -10,10 +15,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy your FastAPI code
 COPY ./app ./app
 
-# Ensure uploads dir exists
-RUN mkdir -p /app/app/uploads
+# Create necessary directories
+RUN mkdir -p /app/app/uploads /app/data
+
+# Set proper permissions
+RUN chmod 755 /app/app/uploads /app/data
 
 EXPOSE 8000
 
-# Start Uvicorn
-CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+# Start Uvicorn with proper reload configuration
+CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000", "--reload-dir", "/app/app"]
