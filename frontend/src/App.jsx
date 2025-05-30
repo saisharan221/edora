@@ -19,6 +19,7 @@ import Channels from './Channels';
 import ChannelView from './ChannelView';
 import PostDetailView from './PostDetailView';
 import SavedPosts from './SavedPosts';
+import ModeratorPanel from './ModeratorPanel';
 
 function App() {
   const [activeScene, setActiveScene] = useState('auth');
@@ -234,6 +235,19 @@ function App() {
               <span>Home</span>
             </div>
           </div>
+          {/* Moderator Panel (only for moderators/admins) */}
+          {(userRole === 'moderator' || userRole === 'admin') && (
+            <div
+              role="button"
+              className={`clickable-link ${activeScene === 'moderator' ? 'active' : ''}`}
+              onClick={() => setActiveScene('moderator')}
+            >
+              <div className="link-content">
+                <img src={settingImage} alt="moderator" className="icon" />
+                <span>Moderator Panel</span>
+              </div>
+            </div>
+          )}
           {/* Channels with dropdown */}
           <div>
             <div
@@ -727,6 +741,7 @@ function App() {
             <p>Support functionality coming soon...</p>
           </div>
         )}
+        {activeScene === 'moderator' && <ModeratorPanel />}
       </main>
     </div>
   );

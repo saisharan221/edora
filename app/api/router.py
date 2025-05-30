@@ -8,6 +8,7 @@ from app.api.posts    import router as posts_router
 from app.api.comments import router as comments_router
 from app.api.reactions import router as reactions_router
 from app.api.saved_posts import router as saved_posts_router
+from app.api.flagged_words import router as flagged_words_router
 # from app.api.resources import router as resources_router  # add when ready
 
 # ─── Collect them into one router ─────────────────────────────────────────────
@@ -19,4 +20,5 @@ api_router.include_router(posts_router)
 api_router.include_router(comments_router)
 api_router.include_router(reactions_router)
 api_router.include_router(saved_posts_router)
+api_router.include_router(flagged_words_router)
 # api_router.include_router(resources_router, prefix="/resources")

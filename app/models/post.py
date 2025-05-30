@@ -49,6 +49,8 @@ class Post(PostBase, table=True):
         link_model=PostTag
     )
     saved_by_users: List["SavedPost"] = Relationship(back_populates="post")
+    flagged: bool = Field(default=False, nullable=False)
+    flag_reason: Optional[str] = Field(default=None, max_length=256)
 
 
 class PostCreate(PostBase):

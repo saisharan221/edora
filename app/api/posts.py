@@ -10,6 +10,7 @@ from app.api.auth import current_user
 from app.models.user import User
 from app.models.channel import Channel
 from app.core.dependencies import require_moderator
+from app.models.flagged_word import FlaggedWord
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -44,6 +45,14 @@ def create_post(
             detail="Post with that title already exists in this channel",
         )
     post = Post(**payload.dict(), author_id=current.id)
+    # Check for flagged words
+    flagged_words = session.exec(select(FlaggedWord)).all()
+    content = (post.content or "").lower()
+    for fw in flagged_words:
+        if fw.word in content:
+            post.flagged = True
+            post.flag_reason = fw.word
+            break
     session.add(post)
     session.commit()
     session.refresh(post)
@@ -73,6 +82,34 @@ def search_posts(
     )
     return session.exec(query).all()
 
+@router.get("/flagged", response_model=list[Post])
+async def list_flagged_posts(session: Session = Depends(get_session), current_user=Depends(require_moderator)):
+    return session.exec(select(Post).where(Post.flagged == True)).all()
+
+@router.post("/{post_id}/approve")
+async def approve_post(post_id: int, session: Session = Depends(get_session), current_user=Depends(require_moderator)):
+    post = session.get(Post, post_id)
+    if not post:
+        raise HTTPException(404, "Post not found")
+    post.flagged = False
+    post.flag_reason = None
+    session.add(post)
+    session.commit()
+    return {"ok": True}
+
+@router.delete("/{post_id}")
+async def delete_post(post_id: int, session: Session = Depends(get_session), current_user=Depends(require_moderator)):
+    post = session.get(Post, post_id)
+    if not post:
+        raise HTTPException(404, "Post not found")
+    session.delete(post)
+    session.commit()
+    return {"ok": True}
+
+@router.get("/test-moderator")
+async def test_moderator(current_user=Depends(require_moderator)):
+    return {"ok": True, "user": getattr(current_user, 'email', None)}
+
 @router.get(
     "/{post_id}",
     response_model=PostRead,
@@ -90,12 +127,3 @@ def get_post(
             detail="Post not found"
         )
     return post
-
-@router.delete("/{post_id}")
-def delete_post(post_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
-    post = session.get(Post, post_id)
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    session.delete(post)
-    session.commit()
-    return {"ok": True}

@@ -27,6 +27,7 @@ from .post_reaction import PostReaction
 from .saved_post import SavedPost
 from .refresh_token import RefreshToken
 from .audit_log import AuditLog
+from .flagged_word import FlaggedWord
 
 __all__ = [
     "User",
@@ -40,4 +41,5 @@ __all__ = [
     "SavedPost",
     "RefreshToken",
     "AuditLog",
+    "FlaggedWord",
 ]
