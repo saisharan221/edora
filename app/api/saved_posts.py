@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models.saved_post import SavedPost, SavedPostCreate, SavedPostRead
-from app.models.post import Post, PostRead
+from app.models.post import Post, PostRead, PostWithAuthor
 from app.models.media_file import MediaFile
 from app.models.user import User
 from app.api.auth import current_user
@@ -89,33 +89,59 @@ def unsave_post(
 
 @router.get(
     "/",
-    response_model=List[PostRead],
+    response_model=List[PostWithAuthor],
 )
 def get_saved_posts(
     session: Session = Depends(get_session),
     current: User = Depends(current_user),
 ):
-    """Get all posts saved by the current user."""
-    # Get saved posts with post details
-    saved_posts = session.exec(
-        select(SavedPost, Post)
+    """Get all posts saved by the current user with author information."""
+    # Get saved posts with post and author details using JOIN
+    stmt = (
+        select(
+            Post.id,
+            Post.title,
+            Post.content,
+            Post.channel_id,
+            Post.author_id,
+            Post.created_at,
+            Post.updated_at,
+            User.email.label("author_email"),
+            User.username.label("author_username"),
+            SavedPost.saved_at
+        )
         .join(Post, SavedPost.post_id == Post.id)
+        .join(User, Post.author_id == User.id)
         .where(SavedPost.user_id == current.id)
         .order_by(SavedPost.saved_at.desc())
-    ).all()
+    )
     
-    # Convert to PostRead format with files
+    results = session.exec(stmt).all()
+    
+    # Convert to PostWithAuthor objects
     posts = []
-    for saved_post, post in saved_posts:
+    for row in results:
         # Get files for this post
         files = session.exec(
-            select(MediaFile).where(MediaFile.post_id == post.id)
+            select(MediaFile).where(MediaFile.post_id == row.id)
         ).all()
         
-        post_dict = post.dict()
-        post_dict["files"] = [file.dict() for file in files]
-        post_dict["is_saved"] = True
-        posts.append(PostRead(**post_dict))
+        post = PostWithAuthor(
+            id=row.id,
+            title=row.title,
+            content=row.content,
+            channel_id=row.channel_id,
+            author_id=row.author_id,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+            author_email=row.author_email,
+            author_username=row.author_username,
+            files=[file.dict() for file in files],
+            like_count=0,  # Will be populated separately if needed
+            dislike_count=0,  # Will be populated separately if needed
+            is_saved=True
+        )
+        posts.append(post)
     
     return posts
 

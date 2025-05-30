@@ -5,12 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from app.db import get_session
-from app.models.post import Post, PostCreate, PostRead
+from app.models.post import Post, PostCreate, PostRead, PostWithAuthor
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.channel import Channel
 from app.core.dependencies import require_moderator
 from app.models.flagged_word import FlaggedWord
+from app.gamification.service import GamificationService
+from app.gamification.models import ActionType
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -56,6 +58,18 @@ def create_post(
     session.add(post)
     session.commit()
     session.refresh(post)
+    
+    # Award points for post upload (10 points)
+    gamification_service = GamificationService(session)
+    gamification_service.award_points(
+        user_id=current.id,
+        points=10,
+        action_type=ActionType.POST_UPLOAD,
+        description=f"Posted '{post.title}' in channel {channel.name}",
+        related_entity_id=post.id,
+        related_entity_type="post"
+    )
+    
     return post
 
 @router.get(
@@ -112,18 +126,53 @@ async def test_moderator(current_user=Depends(require_moderator)):
 
 @router.get(
     "/{post_id}",
-    response_model=PostRead,
+    response_model=PostWithAuthor,
 )
 def get_post(
     post_id: int,
     session: Session = Depends(get_session),
     current: User = Depends(current_user),
 ):
-    """Get a specific post by ID."""
-    post = session.get(Post, post_id)
-    if not post:
+    """Get a specific post by ID with author information."""
+    # Get post with author information using JOIN
+    stmt = (
+        select(
+            Post.id,
+            Post.title,
+            Post.content,
+            Post.channel_id,
+            Post.author_id,
+            Post.created_at,
+            Post.updated_at,
+            User.email.label("author_email"),
+            User.username.label("author_username")
+        )
+        .join(User, Post.author_id == User.id)
+        .where(Post.id == post_id)
+    )
+    
+    result = session.exec(stmt).first()
+    if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found"
         )
-    return post
+    
+    # Create PostWithAuthor object
+    post_with_author = PostWithAuthor(
+        id=result.id,
+        title=result.title,
+        content=result.content,
+        channel_id=result.channel_id,
+        author_id=result.author_id,
+        created_at=result.created_at,
+        updated_at=result.updated_at,
+        author_email=result.author_email,
+        author_username=result.author_username,
+        files=[],  # Will be populated separately if needed
+        like_count=0,  # Will be populated separately if needed
+        dislike_count=0,  # Will be populated separately if needed
+        is_saved=False  # Will be populated separately if needed
+    )
+    
+    return post_with_author

@@ -180,7 +180,12 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
                 <div className="post-footer">
                   <div className="post-author">
                     <div className="author-avatar"></div>
-                    <span>User #{post.author_id}</span>
+                    <span>
+                      {post.author_username 
+                        ? `@${post.author_username}` 
+                        : post.author_email?.split('@')[0] || `User #${post.author_id}`
+                      }
+                    </span>
                   </div>
                   
                   <div className="post-actions">

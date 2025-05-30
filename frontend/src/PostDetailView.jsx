@@ -324,7 +324,12 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
               <div className="author-info">
                 <div className="author-avatar"></div>
                 <div>
-                  <span className="author-name">User #{post.author_id}</span>
+                  <span className="author-name">
+                    {post.author_username 
+                      ? `@${post.author_username}` 
+                      : post.author_email?.split('@')[0] || `User #${post.author_id}`
+                    }
+                  </span>
                   <span className="post-date">{formatDate(post.created_at)}</span>
                 </div>
               </div>
@@ -458,7 +463,12 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
                   <div className="comment-avatar"></div>
                   <div className="comment-content">
                     <div className="comment-header">
-                      <span className="comment-author">User #{comment.author_id}</span>
+                      <span className="comment-author">
+                        {comment.author_username 
+                          ? `@${comment.author_username}` 
+                          : comment.author_email?.split('@')[0] || `User #${comment.author_id}`
+                        }
+                      </span>
                       <span className="comment-date">{formatDate(comment.created_at)}</span>
                     </div>
                     <p className="comment-text">{comment.content}</p>

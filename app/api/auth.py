@@ -1,10 +1,9 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session, select
-from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
 
 from app.database import engine
@@ -30,6 +29,10 @@ class RegisterRequest(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class UpdateUsernameRequest(BaseModel):
+    username: str
 
 
 # ──────────────────────────────────── helpers
@@ -60,7 +63,11 @@ async def current_user(token: str = Depends(oauth2_scheme),
 def register(request: RegisterRequest, session: Session = Depends(db)):
     if session.exec(select(User).where(User.email == request.email)).first():
         raise HTTPException(400, "email already registered")
-    user = User(email=request.email, hashed_password=hash_password(request.password), role=request.role)
+    user = User(
+        email=request.email, 
+        hashed_password=hash_password(request.password), 
+        role=request.role
+    )
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -79,7 +86,7 @@ def login(
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="invalid credentials")
 
-    access_token  = create_access_token(user.id)
+    access_token = create_access_token(user.id)
     refresh_token = create_refresh_token(user.id)
 
     session.add(
@@ -122,6 +129,42 @@ def me(user: User = Depends(current_user)):
     return {
         "id": user.id,
         "email": user.email,
+        "username": user.username,
         "is_superuser": user.is_superuser,
         "role": user.role
+    }
+
+
+@router.put("/username")
+def update_username(
+    request: UpdateUsernameRequest,
+    user: User = Depends(current_user),
+    session: Session = Depends(db)
+):
+    """Update the current user's username."""
+    if not request.username or len(request.username.strip()) == 0:
+        raise HTTPException(400, "Username cannot be empty")
+    
+    if len(request.username.strip()) > 50:
+        raise HTTPException(400, "Username too long (max 50 characters)")
+    
+    # Check if username is already taken by another user
+    existing_user = session.exec(
+        select(User).where(
+            User.username == request.username.strip(),
+            User.id != user.id
+        )
+    ).first()
+    
+    if existing_user:
+        raise HTTPException(400, "Username already taken")
+    
+    user.username = request.username.strip()
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    
+    return {
+        "username": user.username, 
+        "message": "Username updated successfully"
     }

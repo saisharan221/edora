@@ -139,7 +139,12 @@ export default function SavedPosts({ onPostClick, onBack }) {
                 
                 <div className="post-meta">
                   <div className="author-info">
-                    <span className="author-name">User #{post.author_id}</span>
+                    <span className="author-name">
+                      {post.author_username 
+                        ? `@${post.author_username}` 
+                        : post.author_email?.split('@')[0] || `User #${post.author_id}`
+                      }
+                    </span>
                     <span className="post-date">{formatDate(post.created_at)}</span>
                   </div>
                   

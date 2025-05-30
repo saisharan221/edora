@@ -4,6 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select, insert
 from app.api.posts import PostRead, Post  
+from app.models.post import PostWithAuthor
 
 from app.db import get_session
 from app.models.channel import Channel, ChannelCreate, ChannelRead
@@ -138,7 +139,7 @@ def get_channel(
 
 @router.get(
     "/{channel_id}/posts",
-    response_model=List[PostRead],
+    response_model=List[PostWithAuthor],
     status_code=status.HTTP_200_OK,
 )
 def list_channel_posts(
@@ -153,12 +154,47 @@ def list_channel_posts(
             detail="Channel not found"
         )
     
-    # Get all posts in channel, ordered by creation date
-    return session.exec(
-        select(Post)
+    # Get all posts in channel with author information using JOIN
+    stmt = (
+        select(
+            Post.id,
+            Post.title,
+            Post.content,
+            Post.channel_id,
+            Post.author_id,
+            Post.created_at,
+            Post.updated_at,
+            User.email.label("author_email"),
+            User.username.label("author_username")
+        )
+        .join(User, Post.author_id == User.id)
         .where(Post.channel_id == channel_id)
         .order_by(Post.created_at.desc())
-    ).all()
+    )
+    
+    results = session.exec(stmt).all()
+    
+    # Convert to PostWithAuthor objects
+    posts = []
+    for row in results:
+        post = PostWithAuthor(
+            id=row.id,
+            title=row.title,
+            content=row.content,
+            channel_id=row.channel_id,
+            author_id=row.author_id,
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+            author_email=row.author_email,
+            author_username=row.author_username,
+            files=[],  # Will be populated separately if needed
+            like_count=0,  # Will be populated separately if needed
+            dislike_count=0,  # Will be populated separately if needed
+            is_saved=False  # Will be populated separately if needed
+        )
+        posts.append(post)
+    
+    return posts
 
 
 @router.post("/{channel_id}/join")

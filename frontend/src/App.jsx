@@ -25,7 +25,7 @@ function App() {
   const [activeScene, setActiveScene] = useState('auth');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('user');
-  const [points, setPoints] = useState(240);
+  const [points, setPoints] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [lastSearchedQuery, setLastSearchedQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
@@ -33,6 +33,8 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [savedDocuments, setSavedDocuments] = useState([]);
   const [subscribedChannels, setSubscribedChannels] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   
   // Navigation state for channel and post views
   const [selectedChannelId, setSelectedChannelId] = useState(null);
@@ -42,6 +44,9 @@ function App() {
   // New state for channels dropdown
   const [channelsDropdownOpen, setChannelsDropdownOpen] = useState(false);
   const [channelsView, setChannelsView] = useState('all'); // 'all' or 'your'
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
+  const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
   // Check authentication status on app load
   useEffect(() => {
@@ -94,6 +99,15 @@ function App() {
     const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
     try {
+      // Fetch current user info
+      const userResponse = await fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setCurrentUser(userData);
+      }
+
       // Fetch saved documents
       const savedResponse = await fetch(`${API}/saved-posts/`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -110,6 +124,31 @@ function App() {
       if (channelsResponse.ok) {
         const channelsData = await channelsResponse.json();
         setSubscribedChannels(channelsData.slice(0, 5)); // Show only first 5
+      }
+
+      // Fetch user points
+      const pointsResponse = await fetch(`${API}/api/gamification/my-points`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (pointsResponse.ok) {
+        const pointsData = await pointsResponse.json();
+        setPoints(pointsData.points);
+      }
+
+      // Fetch leaderboard
+      const leaderboardResponse = await fetch(`${API}/api/gamification/leaderboard?limit=5`);
+      if (leaderboardResponse.ok) {
+        const leaderboardData = await leaderboardResponse.json();
+        // Transform the data to include a display name from username or email
+        const transformedLeaderboard = leaderboardData.map((user, index) => ({
+          id: user.user_id,
+          name: user.username || user.email.split('@')[0], // Use username if available, otherwise email prefix
+          email: user.email,
+          username: user.username,
+          points: user.points,
+          rank: user.rank || index + 1
+        }));
+        setLeaderboard(transformedLeaderboard);
       }
     } catch (error) {
       console.error('Error fetching home page data:', error);
@@ -179,6 +218,49 @@ function App() {
       setActiveScene('channels');
     }
     setPreviousScene(null);
+  };
+
+  const handleUsernameClick = () => {
+    setUsernameInput(currentUser?.username || '');
+    setShowUsernameModal(true);
+  };
+
+  const updateUsername = async () => {
+    if (!usernameInput.trim()) {
+      alert('Username cannot be empty');
+      return;
+    }
+
+    setIsUpdatingUsername(true);
+    const token = localStorage.getItem('access_token');
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+    try {
+      const response = await fetch(`${API}/auth/username`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username: usernameInput.trim() }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(prev => ({ ...prev, username: data.username }));
+        setShowUsernameModal(false);
+        fetchHomePageData(); // Refresh data to update leaderboard
+        alert('Username updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Failed to update username: ${error.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating username:', error);
+      alert('Failed to update username. Please try again.');
+    } finally {
+      setIsUpdatingUsername(false);
+    }
   };
 
   // Show auth page if not authenticated
@@ -376,6 +458,11 @@ function App() {
           {(userRole === 'moderator' || userRole === 'admin') && (
             <div className="moderator-label">Moderator</div>
           )}
+          <div className="username-display" onClick={handleUsernameClick} style={{ cursor: 'pointer', marginBottom: '8px' }}>
+            <span style={{ fontSize: '14px', color: '#666' }}>
+              {currentUser?.username ? `@${currentUser.username}` : 'Set username'}
+            </span>
+          </div>
           <div className="points-display">
             <img src={coinsImage} alt="coins" className="coins-icon" />
             <span>{points} points</span>
@@ -611,28 +698,43 @@ function App() {
                   </div>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="dashboard-card recent-activity">
+                {/* Leaderboard */}
+                <div className="dashboard-card leaderboard">
                   <div className="card-header">
                     <h3>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M8 9h3m-3 8a1 1 0 0 1-1-1v-7c0-.6.4-1 1-1h7c.6 0 1 .4 1 1v7a1 1 0 0 1-1 1M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
                       </svg>
-                      Recent Activity
+                      Leaderboard
                     </h3>
                   </div>
                   <div className="card-content">
-                    <div className="activity-list">
-                      <div className="activity-item">
-                        <div className="activity-avatar">
-                          <img src={homeImage} alt="user" />
-                        </div>
-                        <div className="activity-content">
-                          <p><strong>System</strong> initialized successfully</p>
-                          <small>Welcome to Edora!</small>
-                        </div>
+                    {leaderboard.length > 0 ? (
+                      <div className="leaderboard-list">
+                        {leaderboard.map((user, index) => (
+                          <div key={user.id} className="leaderboard-item">
+                            <div className="leaderboard-rank">
+                              {index === 0 && <span className="trophy gold">🥇</span>}
+                              {index === 1 && <span className="trophy silver">🥈</span>}
+                              {index === 2 && <span className="trophy bronze">🥉</span>}
+                              {index > 2 && <span className="rank-number">#{user.rank}</span>}
+                            </div>
+                            <div className="leaderboard-avatar">
+                              <img src={homeImage} alt="user" />
+                            </div>
+                            <div className="leaderboard-content">
+                              <p><strong>{user.name}</strong></p>
+                              <small>{user.points} points</small>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="empty-state">
+                        <p>No users with points yet</p>
+                        <small>Start earning points by posting and commenting!</small>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -743,6 +845,50 @@ function App() {
         )}
         {activeScene === 'moderator' && <ModeratorPanel />}
       </main>
+
+      {/* Username Modal */}
+      {showUsernameModal && (
+        <div className="modal-overlay" onClick={() => setShowUsernameModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Set Your Username</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowUsernameModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Choose a username that other users will see on the leaderboard:</p>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="Enter your username"
+                maxLength={50}
+                className="username-input"
+                onKeyPress={(e) => e.key === 'Enter' && !isUpdatingUsername && updateUsername()}
+              />
+              <div className="modal-actions">
+                <button 
+                  onClick={() => setShowUsernameModal(false)}
+                  className="modal-btn secondary"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={updateUsername}
+                  disabled={isUpdatingUsername}
+                  className="modal-btn primary"
+                >
+                  {isUpdatingUsername ? 'Updating...' : 'Update Username'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

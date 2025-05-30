@@ -13,6 +13,8 @@ from app.models.post_reaction import (
 from app.models.post import Post
 from app.api.auth import current_user
 from app.models.user import User
+from app.gamification.service import GamificationService
+from app.gamification.models import ActionType
 
 router = APIRouter(prefix="/reactions", tags=["reactions"])
 
@@ -43,7 +45,37 @@ def create_or_update_reaction(
         )
     ).first()
     
+    gamification_service = GamificationService(session)
+    
     if existing_reaction:
+        # Handle updating existing reaction
+        old_type = existing_reaction.reaction_type
+        new_type = payload.reaction_type
+        
+        # If changing from like to dislike or vice versa
+        if old_type != new_type:
+            if old_type == ReactionType.LIKE:
+                # Remove point for removed like
+                gamification_service.remove_points(
+                    user_id=post.author_id,
+                    points=1,
+                    action_type=ActionType.LIKE_REMOVED,
+                    description=f"Like removed from post '{post.title}'",
+                    related_entity_id=post.id,
+                    related_entity_type="post"
+                )
+            
+            if new_type == ReactionType.LIKE:
+                # Award point for new like
+                gamification_service.award_points(
+                    user_id=post.author_id,
+                    points=1,
+                    action_type=ActionType.LIKE_RECEIVED,
+                    description=f"Like received on post '{post.title}'",
+                    related_entity_id=post.id,
+                    related_entity_type="post"
+                )
+        
         # Update existing reaction
         existing_reaction.reaction_type = payload.reaction_type
         session.add(existing_reaction)
@@ -60,6 +92,18 @@ def create_or_update_reaction(
         session.add(reaction)
         session.commit()
         session.refresh(reaction)
+        
+        # Award point if it's a like
+        if payload.reaction_type == ReactionType.LIKE:
+            gamification_service.award_points(
+                user_id=post.author_id,
+                points=1,
+                action_type=ActionType.LIKE_RECEIVED,
+                description=f"Like received on post '{post.title}'",
+                related_entity_id=post.id,
+                related_entity_type="post"
+            )
+        
         return reaction
 
 
@@ -92,6 +136,18 @@ def remove_reaction(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No reaction found"
+        )
+    
+    # Remove points if it was a like
+    if reaction.reaction_type == ReactionType.LIKE:
+        gamification_service = GamificationService(session)
+        gamification_service.remove_points(
+            user_id=post.author_id,
+            points=1,
+            action_type=ActionType.LIKE_REMOVED,
+            description=f"Like removed from post '{post.title}'",
+            related_entity_id=post.id,
+            related_entity_type="post"
         )
     
     # Delete reaction

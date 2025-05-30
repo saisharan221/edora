@@ -14,6 +14,7 @@ Order here:
   7. PostReaction – needs Post & User
   8. SavedPost – needs Post & User
   9. RefreshToken, AuditLog – independent
+  10. Gamification models – needs User
 """
 
 from .user import User                 # ← User first
@@ -28,6 +29,7 @@ from .saved_post import SavedPost
 from .refresh_token import RefreshToken
 from .audit_log import AuditLog
 from .flagged_word import FlaggedWord
+from ..gamification.models import PointTransaction
 
 __all__ = [
     "User",
@@ -42,4 +44,5 @@ __all__ = [
     "RefreshToken",
     "AuditLog",
     "FlaggedWord",
+    "PointTransaction",
 ]

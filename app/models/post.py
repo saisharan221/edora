@@ -80,3 +80,20 @@ class PostRead(PostBase):
 
     class Config:
         from_attributes = True
+
+
+class PostWithAuthor(PostBase):
+    id: int
+    channel_id: int
+    author_id: int
+    created_at: dt.datetime
+    updated_at: dt.datetime
+    files: List[MediaFileRead] = []
+    like_count: int = 0
+    dislike_count: int = 0
+    is_saved: bool = False
+    author_email: str
+    author_username: Optional[str] = None
+
+    class Config:
+        from_attributes = True

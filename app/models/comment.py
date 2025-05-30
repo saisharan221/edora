@@ -21,7 +21,9 @@ class Comment(CommentBase, table=True):
     author_id: int = Field(foreign_key="user.id", nullable=False)
     
     # Timestamps
-    created_at: dt.datetime = Field(default_factory=dt.datetime.utcnow, nullable=False)
+    created_at: dt.datetime = Field(
+        default_factory=dt.datetime.utcnow, nullable=False
+    )
     updated_at: dt.datetime = Field(
         default_factory=dt.datetime.utcnow,
         sa_column_kwargs={"onupdate": dt.datetime.utcnow},
@@ -43,3 +45,16 @@ class CommentRead(CommentBase):
     author_id: int
     created_at: dt.datetime
     updated_at: dt.datetime
+
+
+class CommentWithAuthor(CommentBase):
+    id: int
+    post_id: int
+    author_id: int
+    created_at: dt.datetime
+    updated_at: dt.datetime
+    author_email: str
+    author_username: Optional[str] = None
+
+    class Config:
+        from_attributes = True
