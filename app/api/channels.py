@@ -7,7 +7,7 @@ from app.api.posts import PostRead, Post
 from app.models.post import PostWithAuthor
 
 from app.db import get_session
-from app.models.channel import Channel, ChannelCreate, ChannelRead
+from app.models.channel import Channel, ChannelCreate, ChannelRead, ChannelUpdate
 from app.api.auth import current_user
 from app.models.user import User
 from app.models.association_tables import channel_user_link
@@ -252,3 +252,37 @@ def delete_channel(channel_id: int, session: Session = Depends(get_session), use
     session.delete(channel)
     session.commit()
     return {"ok": True}
+
+
+@router.put("/{channel_id}", response_model=ChannelRead)
+def update_channel(
+    channel_id: int,
+    payload: ChannelUpdate,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user),
+):
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+    # Only owner, admin, or moderator can update
+    if not (
+        current.id == channel.owner_id or
+        getattr(current, 'role', None) in ('admin', 'moderator')
+    ):
+        raise HTTPException(status_code=403, detail="Not authorized to edit this channel")
+    updated = False
+    if payload.name is not None:
+        channel.name = payload.name
+        updated = True
+    if payload.bio is not None:
+        channel.bio = payload.bio
+        updated = True
+    if payload.logo_filename is not None:
+        channel.logo_filename = payload.logo_filename
+        updated = True
+    # Add tags or other fields if needed
+    if updated:
+        session.add(channel)
+        session.commit()
+        session.refresh(channel)
+    return channel

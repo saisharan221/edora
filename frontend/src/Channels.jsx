@@ -43,6 +43,11 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [joining, setJoining] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
 
   const token = localStorage.getItem('access_token');
   const userId = parseInt(localStorage.getItem('user_id'));
@@ -75,6 +80,19 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
     }
   };
 
+  const handleLeave = async (channelId) => {
+    try {
+      const res = await fetch(`${API}/channels/${channelId}/leave`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to leave channel');
+      setChannels(channels.map(ch => ch.id === channelId ? { ...ch, joined: false } : ch));
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleDelete = async (channelId) => {
     if (!window.confirm('Are you sure you want to delete this channel?')) return;
     try {
@@ -86,6 +104,47 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
       setChannels(channels.filter(ch => ch.id !== channelId));
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleEditClick = (ch) => {
+    setEditingId(ch.id);
+    setEditName(ch.name);
+    setEditBio(ch.bio || "");
+    setEditError("");
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditName("");
+    setEditBio("");
+    setEditError("");
+  };
+
+  const handleEditSave = async (ch) => {
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const res = await fetch(`${API}/channels/${ch.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: editName, bio: editBio }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setEditError(body.detail || 'Failed to update channel');
+      } else {
+        // Update local state
+        setChannels(channels.map(c => c.id === ch.id ? { ...c, name: editName, bio: editBio } : c));
+        setEditingId(null);
+      }
+    } catch (err) {
+      setEditError('Failed to update channel');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -108,56 +167,76 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
           <div
             key={ch.id}
             className="channel-card"
-            onClick={() => onChannelClick && onChannelClick(ch.id)}
-            style={{
-              cursor: 'pointer',
-              opacity: 1,
-              position: 'relative',
+            style={{ cursor: 'pointer', opacity: 1, position: 'relative' }}
+            onClick={() => {
+              if (!editingId) onChannelClick && onChannelClick(ch.id);
             }}
           >
             <div className="channel-header">
-              <h2 className="channel-name">{ch.name}</h2>
-              {ch.bio && <p className="channel-bio">{ch.bio}</p>}
+              {editingId === ch.id ? (
+                <form onSubmit={e => { e.preventDefault(); handleEditSave(ch); }} style={{ width: '100%' }}>
+                  <input
+                    className="create-channel-input outline"
+                    style={{ marginBottom: 8, width: '100%' }}
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="Channel Name"
+                    required
+                  />
+                  <textarea
+                    className="create-channel-textarea outline"
+                    style={{ marginBottom: 8, width: '100%' }}
+                    value={editBio}
+                    onChange={e => setEditBio(e.target.value)}
+                    placeholder="Channel Description"
+                  />
+                  {editError && <div className="create-channel-error">{editError}</div>}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit" className="create-channel-btn" style={{ flex: 1 }} disabled={editLoading}>Save</button>
+                    <button type="button" className="create-channel-btn" style={{ flex: 1, background: '#eee', color: '#333' }} onClick={handleEditCancel} disabled={editLoading}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <h2 className="channel-name">{ch.name}</h2>
+                  {ch.bio && <p className="channel-bio">{ch.bio}</p>}
+                </>
+              )}
             </div>
             <div className="channel-meta">
-              <div className="channel-actions">
-                {ch.joined ? (
-                  <span className="channel-owner">
-                    {ch.owner_id === userId ? 'Your Channel' : 'Joined'}
-                  </span>
+              <div className="channel-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                {!ch.joined ? (
+                  <button
+                    className="create-channel-button"
+                    style={{ flex: 1, padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 18 }}
+                    disabled={joining === ch.id}
+                    onClick={e => { e.stopPropagation(); handleJoin(ch.id); }}
+                  >
+                    {joining === ch.id ? 'Joining...' : 'Join'}
+                  </button>
                 ) : (
                   <button
                     className="create-channel-button"
-                    style={{ padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 12 }}
-                    disabled={joining === ch.id}
-                    onClick={() => handleJoin(ch.id)}
+                    style={{ flex: 1, padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 18, background: '#e0e7ff', color: '#222', fontWeight: 600 }}
+                    onClick={e => { e.stopPropagation(); handleLeave(ch.id); }}
                   >
-                    {joining === ch.id ? 'Joining...' : 'Join'}
+                    Leave
+                  </button>
+                )}
+                {(userRole === 'moderator' || userRole === 'admin' || ch.owner_id === userId) && (
+                  editingId === ch.id ? null : null
+                )}
+                {(userRole === 'moderator' || userRole === 'admin' || ch.owner_id === userId) && (
+                  <button
+                    className="delete-channel-button gradient-red"
+                    style={{ flex: 1, padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 18, color: 'white', border: 'none', fontWeight: 600, boxShadow: '0 2px 8px rgba(255,0,0,0.08)' }}
+                    onClick={e => { e.stopPropagation(); handleDelete(ch.id); }}
+                  >
+                    Delete
                   </button>
                 )}
               </div>
             </div>
-            {(userRole === 'moderator' || userRole === 'admin') && (
-              <button
-                className="delete-channel-button gradient-red"
-                style={{
-                  position: 'absolute',
-                  right: 16,
-                  bottom: 16,
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: 12,
-                  color: 'white',
-                  border: 'none',
-                  fontWeight: 500,
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(255,0,0,0.08)'
-                }}
-                onClick={e => { e.stopPropagation(); handleDelete(ch.id); }}
-              >
-                Delete
-              </button>
-            )}
           </div>
         ))}
       </div>

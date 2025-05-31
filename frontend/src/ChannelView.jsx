@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import './ChannelView.css';
 
-export default function ChannelView({ channelId, onPostClick, onBack }) {
+export default function ChannelView({ channelId, onPostClick, onBack, userRole, currentUser }) {
   const [channel, setChannel] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [leaving, setLeaving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editTags, setEditTags] = useState("");
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
 
   const token = localStorage.getItem('access_token');
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -17,6 +23,14 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
       fetchChannelPosts();
     }
   }, [channelId]);
+
+  useEffect(() => {
+    if (channel) {
+      setEditName(channel.name || "");
+      setEditBio(channel.bio || "");
+      setEditTags(channel.tags || "");
+    }
+  }, [channel]);
 
   const fetchChannelData = async () => {
     try {
@@ -79,6 +93,49 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
     }
   };
 
+  const canEdit = channel && (userRole === 'admin' || userRole === 'moderator' || (currentUser && channel.owner_id === currentUser.id));
+
+  const handleEdit = () => {
+    setEditing(true);
+    setEditError("");
+    setEditSuccess("");
+  };
+
+  const handleEditCancel = () => {
+    setEditing(false);
+    setEditError("");
+    setEditSuccess("");
+    setEditName(channel.name || "");
+    setEditBio(channel.bio || "");
+    setEditTags(channel.tags || "");
+  };
+
+  const handleEditSave = async (e) => {
+    e.preventDefault();
+    setEditError("");
+    setEditSuccess("");
+    try {
+      const res = await fetch(`${API}/channels/${channelId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: editName, bio: editBio, tags: editTags }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setEditError(body.detail || 'Failed to update channel');
+      } else {
+        setEditSuccess('Channel updated!');
+        setEditing(false);
+        fetchChannelData();
+      }
+    } catch (err) {
+      setEditError('Failed to update channel');
+    }
+  };
+
   if (loading) {
     return (
       <div className="channel-view-container">
@@ -117,14 +174,54 @@ export default function ChannelView({ channelId, onPostClick, onBack }) {
         {channel && (
           <>
             <div className="channel-info">
-              <h1 className="channel-title">{channel.name}</h1>
-              {channel.bio && <p className="channel-bio">{channel.bio}</p>}
-              <div className="channel-meta">
-                <span className="post-count">{posts.length} posts</span>
-                <span className="created-date">
-                  Created {formatDate(channel.created_at)}
-                </span>
-              </div>
+              {editing ? (
+                <form onSubmit={handleEditSave} style={{ marginBottom: 16, width: '100%' }}>
+                  <input
+                    className="create-channel-input outline"
+                    style={{ marginBottom: 8, width: '100%' }}
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="Channel Name"
+                    required
+                  />
+                  <textarea
+                    className="create-channel-textarea outline"
+                    style={{ marginBottom: 8, width: '100%' }}
+                    value={editBio}
+                    onChange={e => setEditBio(e.target.value)}
+                    placeholder="Channel Description"
+                  />
+                  <input
+                    className="create-channel-input outline"
+                    style={{ marginBottom: 8, width: '100%' }}
+                    value={editTags}
+                    onChange={e => setEditTags(e.target.value)}
+                    placeholder="Tags (comma separated)"
+                  />
+                  {editError && <div className="create-channel-error">{editError}</div>}
+                  {editSuccess && <div className="create-channel-success">{editSuccess}</div>}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit" className="create-channel-btn" style={{ flex: 1 }}>Save</button>
+                    <button type="button" className="create-channel-btn" style={{ flex: 1, background: '#eee', color: '#333' }} onClick={handleEditCancel}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <h1 className="channel-title">{channel.name}</h1>
+                  {channel.bio && <p className="channel-bio">{channel.bio}</p>}
+                  <div className="channel-meta">
+                    <span className="post-count">{posts.length} posts</span>
+                    <span className="created-date">
+                      Created {formatDate(channel.created_at)}
+                    </span>
+                  </div>
+                  {canEdit && (
+                    <button className="create-channel-btn" style={{ marginTop: 12 }} onClick={handleEdit}>
+                      Edit Channel
+                    </button>
+                  )}
+                </>
+              )}
             </div>
             <button className="leave-channel-button" onClick={handleLeave} disabled={leaving}>
               {leaving ? 'Leaving...' : 'Leave Channel'}

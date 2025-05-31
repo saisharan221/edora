@@ -755,6 +755,8 @@ function App() {
             channelId={selectedChannelId}
             onPostClick={handlePostClick}
             onBack={handleBackToChannels}
+            userRole={userRole}
+            currentUser={currentUser}
           />
         )}
         {activeScene === 'post-view' && selectedPostId && (

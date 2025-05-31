@@ -48,3 +48,9 @@ class Channel(SQLModel, table=True):
         back_populates="joined_channels",
         sa_relationship_kwargs={"secondary": "channel_user_link"}
     )
+
+class ChannelUpdate(SQLModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    logo_filename: Optional[str] = None
+    # Add tags or other fields if needed
