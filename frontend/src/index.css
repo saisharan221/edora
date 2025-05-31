@@ -4,5 +4,5 @@
 
 /* Global app wrapper */
 #root {
-  @apply flex flex-col min-h-screen text-center;
+  @apply flex flex-col;
 }

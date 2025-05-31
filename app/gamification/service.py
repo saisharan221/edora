@@ -64,8 +64,7 @@ class GamificationService:
         return list(self.session.exec(stmt))
 
     def get_leaderboard(self, limit: int = 10) -> List[UserPointsRead]:
-        """Get top users by points."""
-        # Use a window function to calculate ranks
+        """Get top users by points (always fetch latest from DB)."""
         stmt = (
             select(
                 User.id,
@@ -76,11 +75,9 @@ class GamificationService:
                     order_by=User.points.desc()
                 ).label("rank")
             )
-            .where(User.points > 0)
             .order_by(User.points.desc())
             .limit(limit)
         )
-        
         results = self.session.exec(stmt)
         return [
             UserPointsRead(

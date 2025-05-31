@@ -1,5 +1,5 @@
 #root {
-    @apply flex flex-col min-h-screen text-center;  /* Tailwind FTW */
+    @apply flex flex-col;
 }
 
 .card {
@@ -93,7 +93,7 @@
 .main-content {
   flex: 1;
   padding: 60px 20px 20px 20px;
-  background: #f9f9f9;
+  background: transparent;
   overflow-y: auto;
 }
 
@@ -225,13 +225,14 @@
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: #f7f9fc;
+  background: transparent;
   color: #333;
 }
 
 .app {
   display: flex;
   height: 100vh;
+  background: transparent;
 }
 
 .nav-links,
@@ -725,10 +726,154 @@ textarea::placeholder {
   margin: 0 0 1.5rem 0;
 }
 
+.quick-actions-leaderboard-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+.leaderboard-card {
+  min-width: 220px;
+  max-width: 300px;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 2px 16px rgba(60,60,120,0.08);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.your-points-section {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.points-menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+}
+
+.points-avatar-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.points-avatar-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7b2ff2 0%, #6a5fc7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.7rem;
+  position: relative;
+}
+
+.points-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  object-fit: cover;
+  background: #f3f4f6;
+}
+
+.points-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.points-desc {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.leaderboard-list-section {
+  width: 100%;
+}
+
+.leaderboard-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.leaderboard-add-btn {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaderboard-list-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.leaderboard-modern-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.leaderboard-modern-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f3f4f6;
+}
+
+.leaderboard-modern-name {
+  flex: 1;
+  font-weight: 500;
+  color: #22223b;
+}
+
+.leaderboard-modern-points {
+  background: #7b2ff2;
+  color: #fff;
+  border-radius: 16px;
+  padding: 0.3rem 1rem;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .action-card {
@@ -782,7 +927,7 @@ textarea::placeholder {
 
 /* Dashboard Content */
 .dashboard-content {
-  margin-bottom: 2rem;
+  margin-top: 3.5rem;
 }
 
 .dashboard-grid {
@@ -798,6 +943,11 @@ textarea::placeholder {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   overflow: hidden;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 2rem 1.5rem;
 }
 
 .dashboard-card:hover {
@@ -970,33 +1120,58 @@ textarea::placeholder {
 
 /* Stats Grid */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: flex-start;
+  margin-top: 1rem;
 }
 
 .stat-item {
-  text-align: center;
-  padding: 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f5f7fa;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  min-width: 180px;
+  box-shadow: 0 1px 4px rgba(60,60,120,0.04);
+}
+
+.stat-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e7ff;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  color: #4f46e5;
 }
 
 .stat-number {
-  display: block;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #3b82f6;
-  margin-bottom: 0.25rem;
+  color: #222;
+  margin-right: 0.5rem;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: #6b7280;
+  font-size: 1rem;
+  color: #666;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+}
+
+.stats-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats-card .card-header svg {
+  color: #4f46e5;
 }
 
 /* Responsive Design */
@@ -1343,4 +1518,60 @@ textarea::placeholder {
 
 .username-display:hover {
   background: #f3f4f6;
+}
+
+.actions-leaderboard-row {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  margin-top: 2rem;
+}
+
+.quick-actions-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.dashboard-main-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5rem;
+}
+
+.dashboard-main-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-leaderboard-col {
+  width: 300px;
+  min-width: 220px;
+}
+
+.sticky-leaderboard {
+  position: sticky;
+  top: 2.5rem;
+  z-index: 10;
+}
+
+/* Remove any fixed/absolute points display at the bottom left */
+.points-display-bottom {
+  display: none !important;
+}
+
+/* Remove white bar at the bottom of the app */
+.app {
+  display: flex;
+  height: 100vh;
+  background: transparent;
+}
+
+body {
+  background: transparent;
 }

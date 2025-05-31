@@ -412,17 +412,6 @@ function App() {
               <span>Settings</span>
             </div>
           </div>
-          {/* Support */}
-          <div
-            role="button"
-            className={`clickable-link ${activeScene === 'support' ? 'active' : ''}`}
-            onClick={() => setActiveScene('support')}
-          >
-            <div className="link-content">
-              <img src={supportImage} alt="support" className="icon" />
-              <span>Support</span>
-            </div>
-          </div>
         </nav>
 
         <div className="bottom-links">
@@ -462,10 +451,6 @@ function App() {
             <span style={{ fontSize: '14px', color: '#666' }}>
               {currentUser?.username ? `@${currentUser.username}` : 'Set username'}
             </span>
-          </div>
-          <div className="points-display">
-            <img src={coinsImage} alt="coins" className="coins-icon" />
-            <span>{points} points</span>
           </div>
         </div>
       </aside>
@@ -548,198 +533,180 @@ function App() {
               </div>
             </div>
 
-            {/* Quick Actions Section */}
-            <div className="quick-actions-section">
-              <h2 className="section-title">Quick Actions</h2>
-              <div className="quick-actions-grid">
-                <div
-                  className="action-card upload-card"
-                  onClick={() => setActiveScene('upload')}
-                >
-                  <div className="action-icon">
-                    <img src={uploadImage} alt="upload" />
+            {/* Main actions + leaderboard row */}
+            <div className="dashboard-main-row">
+              <div className="dashboard-main-col">
+                <h2 className="section-title">Quick Actions</h2>
+                <div className="quick-actions-grid">
+                  <div
+                    className="action-card upload-card"
+                    onClick={() => setActiveScene('upload')}
+                  >
+                    <div className="action-icon">
+                      <img src={uploadImage} alt="upload" />
+                    </div>
+                    <h3>Upload Files</h3>
+                    <p>Share your documents and files with the community</p>
                   </div>
-                  <h3>Upload Files</h3>
-                  <p>Share your documents and files with the community</p>
+                  <div
+                    className="action-card create-card"
+                    onClick={() => setActiveScene('create')}
+                  >
+                    <div className="action-icon">
+                      <img src={createImage} alt="create" />
+                    </div>
+                    <h3>Create Channel</h3>
+                    <p>Start a new channel for your community</p>
+                  </div>
+                  <div
+                    className="action-card channels-card"
+                    onClick={() => setActiveScene('channels')}
+                  >
+                    <div className="action-icon">
+                      <img src={channelImage} alt="channels" />
+                    </div>
+                    <h3>Browse Channels</h3>
+                    <p>Explore and join existing channels</p>
+                  </div>
+                  <div
+                    className="action-card saved-card"
+                    onClick={() => setActiveScene('saved')}
+                  >
+                    <div className="action-icon">
+                      <img src={saveImage} alt="saved" />
+                    </div>
+                    <h3>Saved Posts</h3>
+                    <p>Access your saved documents</p>
+                  </div>
                 </div>
-                
-                <div
-                  className="action-card create-card"
-                  onClick={() => setActiveScene('create')}
-                >
-                  <div className="action-icon">
-                    <img src={createImage} alt="create" />
+                <div className="dashboard-content">
+                  <div className="dashboard-grid">
+                    {/* Saved Documents */}
+                    <div className="dashboard-card saved-docs">
+                      <div className="card-header">
+                        <h3>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                          </svg>
+                          Saved Documents
+                        </h3>
+                        <span className="item-count">{savedDocuments.length}</span>
+                      </div>
+                      <div className="card-content">
+                        {savedDocuments.length > 0 ? (
+                          <>
+                            <div className="item-list">
+                              {savedDocuments.slice(0, 3).map((doc) => (
+                                <div 
+                                  key={doc.id}
+                                  className="list-item"
+                                  onClick={() => handlePostClick(doc.id)}
+                                >
+                                  <div className="item-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <path d="M14 2v6h6" />
+                                    </svg>
+                                  </div>
+                                  <span className="item-title">{doc.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {savedDocuments.length > 3 && (
+                              <button 
+                                onClick={() => setActiveScene('saved')}
+                                className="view-all-btn"
+                              >
+                                View All ({savedDocuments.length})
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <div className="empty-state">
+                            <p>No saved documents yet</p>
+                            <small>Save posts to see them here</small>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Your Stats (replacing Available Channels) */}
+                    <div className="dashboard-card stats-card">
+                      <div className="card-header">
+                        <h3>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM19 4h-4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                          </svg>
+                          Your Stats
+                        </h3>
+                      </div>
+                      <div className="card-content">
+                        <div className="stats-grid">
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{savedDocuments.length}</span>
+                            <span className="stat-label">Saved</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{subscribedChannels.length}</span>
+                            <span className="stat-label">Channels</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#4f46e5">P</text>
+                              </svg>
+                            </span>
+                            <span className="stat-number">{points}</span>
+                            <span className="stat-label">Points</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3>Create Channel</h3>
-                  <p>Start a new channel for your community</p>
-                </div>
-                
-                <div
-                  className="action-card channels-card"
-                  onClick={() => setActiveScene('channels')}
-                >
-                  <div className="action-icon">
-                    <img src={channelImage} alt="channels" />
-                  </div>
-                  <h3>Browse Channels</h3>
-                  <p>Explore and join existing channels</p>
-                </div>
-                
-                <div
-                  className="action-card saved-card"
-                  onClick={() => setActiveScene('saved')}
-                >
-                  <div className="action-icon">
-                    <img src={saveImage} alt="saved" />
-                  </div>
-                  <h3>Saved Posts</h3>
-                  <p>Access your saved documents</p>
                 </div>
               </div>
-            </div>
-
-            {/* Dashboard Content */}
-            <div className="dashboard-content">
-              <div className="dashboard-grid">
-                {/* Saved Documents */}
-                <div className="dashboard-card saved-docs">
-                  <div className="card-header">
-                    <h3>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                      </svg>
-                      Saved Documents
-                    </h3>
-                    <span className="item-count">{savedDocuments.length}</span>
+              <div className="dashboard-leaderboard-col">
+                <div className="leaderboard-card sticky-leaderboard">
+                  <div className="your-points-section">
+                    <div className="points-header">
+                      <span>Your Points</span>
+                      <button className="points-menu-btn">⋮</button>
+                    </div>
+                    <div className="points-avatar-progress">
+                      <div className="points-avatar-ring">
+                        <img src={currentUser?.avatar || '/default-avatar.png'} alt="avatar" className="points-avatar" />
+                      </div>
+                      <div className="points-value">{points} Points</div>
+                      <div className="points-desc">Continue Your Journey And Achieve Your Target</div>
+                    </div>
                   </div>
-                  <div className="card-content">
-                    {savedDocuments.length > 0 ? (
-                      <>
-                        <div className="item-list">
-                          {savedDocuments.slice(0, 3).map((doc) => (
-                            <div 
-                              key={doc.id}
-                              className="list-item"
-                              onClick={() => handlePostClick(doc.id)}
-                            >
-                              <div className="item-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                  <path d="M14 2v6h6" />
-                                </svg>
-                              </div>
-                              <span className="item-title">{doc.title}</span>
-                            </div>
-                          ))}
+                  <div className="leaderboard-list-section">
+                    <div className="leaderboard-header-row">
+                      <span>Leaderboard</span>
+                      <button className="leaderboard-add-btn">+</button>
+                    </div>
+                    <div className="leaderboard-list-modern">
+                      {leaderboard.map((user, idx) => (
+                        <div className="leaderboard-modern-item" key={user.id}>
+                          <img src={user.avatar ? user.avatar : '/default-avatar.png'} alt="avatar" className="leaderboard-modern-avatar" />
+                          <span className="leaderboard-modern-name">{user.name}</span>
+                          <span className="leaderboard-modern-points">{typeof user.points === 'number' ? user.points : 0} Points</span>
                         </div>
-                        {savedDocuments.length > 3 && (
-                          <button 
-                            onClick={() => setActiveScene('saved')}
-                            className="view-all-btn"
-                          >
-                            View All ({savedDocuments.length})
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <div className="empty-state">
-                        <p>No saved documents yet</p>
-                        <small>Save posts to see them here</small>
-                      </div>
-                    )}
+                      ))}
+                    </div>
                   </div>
                 </div>
-
-                {/* Available Channels */}
-                <div className="dashboard-card subscribed">
-                  <div className="card-header">
-                    <h3>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                      </svg>
-                      Available Channels
-                    </h3>
-                    <span className="item-count">{subscribedChannels.length}</span>
-                  </div>
-                  <div className="card-content">
-                    {subscribedChannels.length > 0 ? (
-                      <>
-                        <div className="item-list">
-                          {subscribedChannels.slice(0, 3).map((channel) => (
-                            <div 
-                              key={channel.id}
-                              className="list-item"
-                              onClick={() => handleChannelClick(channel.id)}
-                            >
-                              <div className="item-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                                </svg>
-                              </div>
-                              <span className="item-title">{channel.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                        {subscribedChannels.length > 3 && (
-                          <button 
-                            onClick={() => setActiveScene('channels')}
-                            className="view-all-btn"
-                          >
-                            View All ({subscribedChannels.length})
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <div className="empty-state">
-                        <p>No channels available</p>
-                        <small>Create or explore channels</small>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Leaderboard */}
-                <div className="dashboard-card leaderboard">
-                  <div className="card-header">
-                    <h3>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M8 9h3m-3 8a1 1 0 0 1-1-1v-7c0-.6.4-1 1-1h7c.6 0 1 .4 1 1v7a1 1 0 0 1-1 1M8 9V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3" />
-                      </svg>
-                      Leaderboard
-                    </h3>
-                  </div>
-                  <div className="card-content">
-                    {leaderboard.length > 0 ? (
-                      <div className="leaderboard-list">
-                        {leaderboard.map((user, index) => (
-                          <div key={user.id} className="leaderboard-item">
-                            <div className="leaderboard-rank">
-                              {index === 0 && <span className="trophy gold">🥇</span>}
-                              {index === 1 && <span className="trophy silver">🥈</span>}
-                              {index === 2 && <span className="trophy bronze">🥉</span>}
-                              {index > 2 && <span className="rank-number">#{user.rank}</span>}
-                            </div>
-                            <div className="leaderboard-avatar">
-                              <img src={homeImage} alt="user" />
-                            </div>
-                            <div className="leaderboard-content">
-                              <p><strong>{user.name}</strong></p>
-                              <small>{user.points} points</small>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="empty-state">
-                        <p>No users with points yet</p>
-                        <small>Start earning points by posting and commenting!</small>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Stats Card */}
-                <div className="dashboard-card stats-card">
+                <div className="dashboard-card stats-card" style={{marginTop: '2rem'}}>
                   <div className="card-header">
                     <h3>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -835,12 +802,6 @@ function App() {
           <div className="placeholder-content">
             <h2>Settings</h2>
             <p>Settings functionality coming soon...</p>
-          </div>
-        )}
-        {activeScene === 'support' && (
-          <div className="placeholder-content">
-            <h2>Support</h2>
-            <p>Support functionality coming soon...</p>
           </div>
         )}
         {activeScene === 'moderator' && <ModeratorPanel />}
