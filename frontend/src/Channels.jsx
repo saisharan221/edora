@@ -204,7 +204,7 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
               )}
             </div>
             <div className="channel-meta">
-              <div className="channel-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <div className="channel-actions" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
                 {!ch.joined ? (
                   <button
                     className="create-channel-button"
@@ -224,9 +224,6 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
                   </button>
                 )}
                 {(userRole === 'moderator' || userRole === 'admin' || ch.owner_id === userId) && (
-                  editingId === ch.id ? null : null
-                )}
-                {(userRole === 'moderator' || userRole === 'admin' || ch.owner_id === userId) && (
                   <button
                     className="delete-channel-button gradient-red"
                     style={{ flex: 1, padding: '0.4rem 1rem', fontSize: '0.95rem', borderRadius: 18, color: 'white', border: 'none', fontWeight: 600, boxShadow: '0 2px 8px rgba(255,0,0,0.08)' }}
@@ -234,6 +231,9 @@ export default function Channels({ onChannelClick, onCreateClick, view, userRole
                   >
                     Delete
                   </button>
+                )}
+                {ch.owner_id === userId && (
+                  <span className="my-channel-badge">My Channel</span>
                 )}
               </div>
             </div>

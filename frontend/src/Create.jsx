@@ -10,8 +10,8 @@ export default function Create({ onChannelCreated }) {
   const [success, setSuccess] = useState("");
 
   // For preview
-  const previewName = name || "ashchannel";
-  const previewBio = bio || "this is ash channel";
+  const previewName = name || "Default Channel";
+  const previewBio = bio || "Default Description";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

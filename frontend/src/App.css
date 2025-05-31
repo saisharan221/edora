@@ -1589,3 +1589,33 @@ body {
   font-size: 1.1rem;
   margin-right: 0.8rem;
 }
+
+.my-channel-badge {
+  background: #6d28d9;
+  color: #ffffff;
+  padding: 6px 15px;
+  border-radius: 17px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-left: 60px;
+  display: inline-block;
+  vertical-align: middle;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(60,60,120,0.04);
+  font-family: inherit;
+}
+
+.channel-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.channel-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}

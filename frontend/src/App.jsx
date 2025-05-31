@@ -49,6 +49,9 @@ function App() {
   const [usernameInput, setUsernameInput] = useState('');
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
+  // Add new state for all joined channels for stats
+  const [userJoinedChannels, setUserJoinedChannels] = useState([]);
+
   // Check authentication status on app load
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -118,13 +121,16 @@ function App() {
         setSavedDocuments(savedData.slice(0, 5)); // Show only first 5
       }
 
-      // Fetch all channels (as subscribed channels for now)
+      // Fetch all channels
       const channelsResponse = await fetch(`${API}/channels/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (channelsResponse.ok) {
         const channelsData = await channelsResponse.json();
-        setSubscribedChannels(channelsData.slice(0, 5)); // Show only first 5
+        // Only joined channels for stats
+        const joinedChannels = channelsData.filter(ch => ch.joined);
+        setSubscribedChannels(joinedChannels.slice(0, 5)); // For preview, still show up to 5 joined channels
+        setUserJoinedChannels(joinedChannels); // New state for stats
       }
 
       // Fetch user points
@@ -264,6 +270,13 @@ function App() {
     }
   };
 
+  // Add effect to refresh data when navigating to home
+  useEffect(() => {
+    if (activeScene === 'home') {
+      fetchHomePageData();
+    }
+  }, [activeScene]);
+
   // Show auth page if not authenticated
   if (!isAuthenticated || activeScene === 'auth') {
     return <Auth onLogin={handleLogin} />;
@@ -311,7 +324,10 @@ function App() {
           <div
             role="button"
             className={`clickable-link ${activeScene === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveScene('home')}
+            onClick={() => {
+              setActiveScene('home');
+              fetchHomePageData(); // Also refresh immediately on click
+            }}
           >
             <div className="link-content">
               <img src={homeImage} alt="dashboard" className="icon" />
@@ -640,6 +656,38 @@ function App() {
                           Your Stats
                         </h3>
                       </div>
+                      <div className="card-content">
+                        <div className="stats-grid">
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{savedDocuments.length}</span>
+                            <span className="stat-label">Saved</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{userJoinedChannels.length}</span>
+                            <span className="stat-label">Channels</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#4f46e5">P</text>
+                              </svg>
+                            </span>
+                            <span className="stat-number">{points}</span>
+                            <span className="stat-label">Points</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -673,16 +721,6 @@ function App() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                </div>
-                <div className="dashboard-card stats-card" style={{marginTop: '2rem'}}>
-                  <div className="card-header">
-                    <h3>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM19 4h-4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
-                      </svg>
-                      Your Stats
-                    </h3>
                   </div>
                 </div>
               </div>

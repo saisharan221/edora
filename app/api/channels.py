@@ -45,6 +45,12 @@ def create_channel(
     session.add(chan)
     session.commit()
     session.refresh(chan)
+    
+    # Automatically join the user to their created channel
+    ins = insert(channel_user_link).values(channel_id=chan.id, user_id=current.id)
+    session.exec(ins)
+    session.commit()
+    
     return chan
 
 
@@ -245,10 +251,22 @@ def leave_channel(
 
 
 @router.delete("/{channel_id}")
-def delete_channel(channel_id: int, session: Session = Depends(get_session), user: User = Depends(require_moderator)):
+def delete_channel(
+    channel_id: int,
+    session: Session = Depends(get_session),
+    current: User = Depends(current_user)
+):
     channel = session.get(Channel, channel_id)
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
+    
+    # Allow deletion if user is owner, admin, or moderator
+    if not (
+        current.id == channel.owner_id or
+        getattr(current, 'role', None) in ('admin', 'moderator')
+    ):
+        raise HTTPException(status_code=403, detail="Not authorized to delete this channel")
+    
     session.delete(channel)
     session.commit()
     return {"ok": True}
