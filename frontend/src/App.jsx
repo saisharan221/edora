@@ -640,38 +640,6 @@ function App() {
                           Your Stats
                         </h3>
                       </div>
-                      <div className="card-content">
-                        <div className="stats-grid">
-                          <div className="stat-item">
-                            <span className="stat-icon">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                              </svg>
-                            </span>
-                            <span className="stat-number">{savedDocuments.length}</span>
-                            <span className="stat-label">Saved</span>
-                          </div>
-                          <div className="stat-item">
-                            <span className="stat-icon">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                              </svg>
-                            </span>
-                            <span className="stat-number">{subscribedChannels.length}</span>
-                            <span className="stat-label">Channels</span>
-                          </div>
-                          <div className="stat-item">
-                            <span className="stat-icon">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#4f46e5">P</text>
-                              </svg>
-                            </span>
-                            <span className="stat-number">{points}</span>
-                            <span className="stat-label">Points</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -715,22 +683,6 @@ function App() {
                       </svg>
                       Your Stats
                     </h3>
-                  </div>
-                  <div className="card-content">
-                    <div className="stats-grid">
-                      <div className="stat-item">
-                        <span className="stat-number">{savedDocuments.length}</span>
-                        <span className="stat-label">Saved</span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-number">{subscribedChannels.length}</span>
-                        <span className="stat-label">Channels</span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-number">{points}</span>
-                        <span className="stat-label">Points</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
