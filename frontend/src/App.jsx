@@ -20,6 +20,7 @@ import ChannelView from './ChannelView';
 import PostDetailView from './PostDetailView';
 import SavedPosts from './SavedPosts';
 import ModeratorPanel from './ModeratorPanel';
+import avatarImg from './assets/avatar.jpg';
 
 function App() {
   const [activeScene, setActiveScene] = useState('auth');
@@ -684,7 +685,7 @@ function App() {
                     </div>
                     <div className="points-avatar-progress">
                       <div className="points-avatar-ring">
-                        <img src={currentUser?.avatar || '/default-avatar.png'} alt="avatar" className="points-avatar" />
+                        <img src={avatarImg} alt="avatar" className="points-avatar" />
                       </div>
                       <div className="points-value">{points} Points</div>
                       <div className="points-desc">Continue Your Journey And Achieve Your Target</div>
@@ -698,7 +699,7 @@ function App() {
                     <div className="leaderboard-list-modern">
                       {leaderboard.map((user, idx) => (
                         <div className="leaderboard-modern-item" key={user.id}>
-                          <img src={user.avatar ? user.avatar : '/default-avatar.png'} alt="avatar" className="leaderboard-modern-avatar" />
+                          <span className="leaderboard-rank-badge">{idx + 1}</span>
                           <span className="leaderboard-modern-name">{user.name}</span>
                           <span className="leaderboard-modern-points">{typeof user.points === 'number' ? user.points : 0} Points</span>
                         </div>
