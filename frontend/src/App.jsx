@@ -1,7 +1,7 @@
 import './App.css';
-import React, { useState } from 'react';
-import Login from './Login';               // ← our new Login component
-import uploadImage from './assets/upload.jpg';
+import React, { useState, useEffect } from 'react';
+import Auth from './Auth';
+import uploadImage from './assets/upload.png';
 import edoraImage from './assets/edora.png';
 import homeImage from './assets/dashboard.png';
 import channelImage from './assets/channel.png';
@@ -16,24 +16,270 @@ import Upload from './Upload';
 import Create from './Create';
 import Result from './Result';
 import Channels from './Channels';
-
-
-
+import ChannelView from './ChannelView';
+import PostDetailView from './PostDetailView';
+import SavedPosts from './SavedPosts';
+import ModeratorPanel from './ModeratorPanel';
+import avatarImg from './assets/avatar.jpg';
 
 function App() {
-  // if no token, start on the Login screen
-  const [activeScene, setActiveScene] = useState(
-    localStorage.getItem('access_token') ? 'home' : 'login'
-  );
-  const [points, setPoints] = useState(240);
+  const [activeScene, setActiveScene] = useState('auth');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState('user');
+  const [points, setPoints] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastSearchedQuery, setLastSearchedQuery] = useState('');
   const [searchType, setSearchType] = useState('file');
   const [channelsVersion, setChannelsVersion] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
+  const [savedDocuments, setSavedDocuments] = useState([]);
+  const [subscribedChannels, setSubscribedChannels] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  
+  // Navigation state for channel and post views
+  const [selectedChannelId, setSelectedChannelId] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [previousScene, setPreviousScene] = useState(null);
 
-  // show only the Login form until onLogin() is called
-  if (activeScene === 'login') {
-    return <Login onLogin={() => setActiveScene('home')} />;
+  // New state for channels dropdown
+  const [channelsDropdownOpen, setChannelsDropdownOpen] = useState(false);
+  const [channelsView, setChannelsView] = useState('all'); // 'all' or 'your'
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
+  const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
+
+  // Add new state for all joined channels for stats
+  const [userJoinedChannels, setUserJoinedChannels] = useState([]);
+
+  // Check authentication status on app load
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // Verify token is still valid
+      verifyToken(token);
+    } else {
+      setActiveScene('auth');
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  const verifyToken = async (token) => {
+    try {
+      const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setIsAuthenticated(true);
+        setUserRole(data.role || 'user');
+        setActiveScene('home');
+        // Fetch home page data
+        fetchHomePageData();
+      } else {
+        // Token is invalid, clear storage and show auth
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_id');
+        setIsAuthenticated(false);
+        setUserRole('user');
+        setActiveScene('auth');
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_id');
+      setIsAuthenticated(false);
+      setUserRole('user');
+      setActiveScene('auth');
+    }
+  };
+
+  const fetchHomePageData = async () => {
+    const token = localStorage.getItem('access_token');
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+    try {
+      // Fetch current user info
+      const userResponse = await fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setCurrentUser(userData);
+      }
+
+      // Fetch saved documents
+      const savedResponse = await fetch(`${API}/saved-posts/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (savedResponse.ok) {
+        const savedData = await savedResponse.json();
+        setSavedDocuments(savedData.slice(0, 5)); // Show only first 5
+      }
+
+      // Fetch all channels
+      const channelsResponse = await fetch(`${API}/channels/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (channelsResponse.ok) {
+        const channelsData = await channelsResponse.json();
+        // Only joined channels for stats
+        const joinedChannels = channelsData.filter(ch => ch.joined);
+        setSubscribedChannels(joinedChannels.slice(0, 5)); // For preview, still show up to 5 joined channels
+        setUserJoinedChannels(joinedChannels); // New state for stats
+      }
+
+      // Fetch user points
+      const pointsResponse = await fetch(`${API}/api/gamification/my-points`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (pointsResponse.ok) {
+        const pointsData = await pointsResponse.json();
+        setPoints(pointsData.points);
+      }
+
+      // Fetch leaderboard
+      const leaderboardResponse = await fetch(`${API}/api/gamification/leaderboard?limit=5`);
+      if (leaderboardResponse.ok) {
+        const leaderboardData = await leaderboardResponse.json();
+        // Transform the data to include a display name from username or email
+        const transformedLeaderboard = leaderboardData.map((user, index) => ({
+          id: user.user_id,
+          name: user.username || user.email.split('@')[0], // Use username if available, otherwise email prefix
+          email: user.email,
+          username: user.username,
+          points: user.points,
+          rank: user.rank || index + 1
+        }));
+        setLeaderboard(transformedLeaderboard);
+      }
+    } catch (error) {
+      console.error('Error fetching home page data:', error);
+    }
+  };
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    setActiveScene('home');
+    // Fetch user role after login
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setUserRole(data.role || 'user'));
+    }
+    fetchHomePageData();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_id');
+    setIsAuthenticated(false);
+    setActiveScene('auth');
+  };
+
+  const handleChannelClick = (channelId) => {
+    setSelectedChannelId(channelId);
+    setSelectedPostId(null);
+    setActiveScene('channel-view');
+  };
+
+  const handlePostClick = (postId) => {
+    setPreviousScene(activeScene);
+    setSelectedPostId(postId);
+    setActiveScene('post-view');
+  };
+
+  const handleBackToChannels = () => {
+    setSelectedChannelId(null);
+    setSelectedPostId(null);
+    setActiveScene('channels');
+  };
+
+  const handleBackToChannel = () => {
+    setSelectedPostId(null);
+    setActiveScene('channel-view');
+    setPreviousScene(null);
+  };
+
+  const handleBackToSaved = () => {
+    setSelectedPostId(null);
+    setActiveScene('saved');
+    setPreviousScene(null);
+  };
+
+  const handleBackFromPost = () => {
+    setSelectedPostId(null);
+    if (previousScene === 'saved') {
+      setActiveScene('saved');
+    } else if (previousScene === 'channel-view') {
+      setActiveScene('channel-view');
+    } else {
+      setActiveScene('channels');
+    }
+    setPreviousScene(null);
+  };
+
+  const handleUsernameClick = () => {
+    setUsernameInput(currentUser?.username || '');
+    setShowUsernameModal(true);
+  };
+
+  const updateUsername = async () => {
+    if (!usernameInput.trim()) {
+      alert('Username cannot be empty');
+      return;
+    }
+
+    setIsUpdatingUsername(true);
+    const token = localStorage.getItem('access_token');
+    const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
+    try {
+      const response = await fetch(`${API}/auth/username`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username: usernameInput.trim() }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(prev => ({ ...prev, username: data.username }));
+        setShowUsernameModal(false);
+        fetchHomePageData(); // Refresh data to update leaderboard
+        alert('Username updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Failed to update username: ${error.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating username:', error);
+      alert('Failed to update username. Please try again.');
+    } finally {
+      setIsUpdatingUsername(false);
+    }
+  };
+
+  // Add effect to refresh data when navigating to home
+  useEffect(() => {
+    if (activeScene === 'home') {
+      fetchHomePageData();
+    }
+  }, [activeScene]);
+
+  // Show auth page if not authenticated
+  if (!isAuthenticated || activeScene === 'auth') {
+    return <Auth onLogin={handleLogin} />;
   }
 
   const handleSearch = async () => {
@@ -52,8 +298,8 @@ function App() {
         if (!response.ok) throw new Error('Search failed');
         results = await response.json();
       } else if (searchType === 'channel') {
-        // Search channels
-        const response = await fetch(`${API}/channels/?q=${encodeURIComponent(searchQuery)}`, {
+        // Search channels (new endpoint)
+        const response = await fetch(`${API}/channels/search?q=${encodeURIComponent(searchQuery)}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Search failed');
@@ -61,6 +307,7 @@ function App() {
       }
 
       setSearchResults(results);
+      setLastSearchedQuery(searchQuery);
       setActiveScene('result');
     } catch (error) {
       console.error('Search error:', error);
@@ -68,38 +315,75 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    setActiveScene("login");
-  };
-
   return (
     <div className="app">
       <aside className="sidebar">
-        <img src={edoraImage} alt="edora" className="edora-logo" />
+        <img src="/edora-logo.svg" alt="Edora Logo" className="edora-logo" />
         <nav className="nav-links">
           {/* Home */}
           <div
             role="button"
             className={`clickable-link ${activeScene === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveScene('home')}
+            onClick={() => {
+              setActiveScene('home');
+              fetchHomePageData(); // Also refresh immediately on click
+            }}
           >
             <div className="link-content">
               <img src={homeImage} alt="dashboard" className="icon" />
               <span>Home</span>
             </div>
           </div>
-          {/* Channels */}
-          <div
-            role="button"
-            className={`clickable-link ${activeScene === 'channels' ? 'active' : ''}`}
-            onClick={() => setActiveScene('channels')}
-          >
-            <div className="link-content">
-              <img src={channelImage} alt="channels" className="icon" />
-              <span>Channels</span>
+          {/* Moderator Panel (only for moderators/admins) */}
+          {(userRole === 'moderator' || userRole === 'admin') && (
+            <div
+              role="button"
+              className={`clickable-link ${activeScene === 'moderator' ? 'active' : ''}`}
+              onClick={() => setActiveScene('moderator')}
+            >
+              <div className="link-content">
+                <img src={settingImage} alt="moderator" className="icon" />
+                <span>Moderator Panel</span>
+              </div>
             </div>
+          )}
+          {/* Channels with dropdown */}
+          <div>
+            <div
+              role="button"
+              className={`clickable-link ${['channels','channel-view','post-view'].includes(activeScene) ? 'active' : ''}`}
+              onClick={() => {
+                setActiveScene('channels');
+                setChannelsDropdownOpen((open) => !open);
+              }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            >
+              <div className="link-content">
+                <img src={channelImage} alt="channels" className="icon" />
+                <span>Channels</span>
+              </div>
+              <span style={{ marginLeft: 'auto', fontSize: '1.1em', transition: 'transform 0.2s', transform: channelsDropdownOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>&#9654;</span>
+            </div>
+            {channelsDropdownOpen && (
+              <div style={{ marginLeft: 36, marginTop: 4 }}>
+                <div
+                  role="button"
+                  className={`clickable-link ${channelsView === 'your' ? 'active' : ''}`}
+                  style={{ fontSize: '0.98em', padding: '6px 0 6px 10px' }}
+                  onClick={() => { setChannelsView('your'); setActiveScene('channels'); }}
+                >
+                  Your Channels
+                </div>
+                <div
+                  role="button"
+                  className={`clickable-link ${channelsView === 'all' ? 'active' : ''}`}
+                  style={{ fontSize: '0.98em', padding: '6px 0 6px 10px' }}
+                  onClick={() => { setChannelsView('all'); setActiveScene('channels'); }}
+                >
+                  All Channels
+                </div>
+              </div>
+            )}
           </div>
           {/* Messages */}
           <div
@@ -123,9 +407,6 @@ function App() {
               <span>Saved</span>
             </div>
           </div>
-        </nav>
-
-        <div className="bottom-links">
           {/* Notifications */}
           <div
             role="button"
@@ -138,139 +419,430 @@ function App() {
             </div>
           </div>
           {/* Settings */}
-        <div
-          role="button"
-          className={`clickable-link ${activeScene === "settings" ? "active" : ""}`}
-          onClick={handleLogout}
-        >
-          <div className="link-content">
-            <img src={settingImage} alt="logout" className="icon" />
-            <span>Logout</span>
-          </div>
-        </div>
-          {/* Support */}
           <div
             role="button"
-            className={`clickable-link ${activeScene === 'support' ? 'active' : ''}`}
-            onClick={() => setActiveScene('support')}
+            className={`clickable-link ${activeScene === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveScene('settings')}
           >
             <div className="link-content">
-              <img src={supportImage} alt="support" className="icon" />
-              <span>Support</span>
+              <img src={settingImage} alt="settings" className="icon" />
+              <span>Settings</span>
+            </div>
+          </div>
+        </nav>
+
+        <div className="bottom-links">
+          {/* Upload */}
+          <div
+            role="button"
+            className={`clickable-link ${activeScene === 'upload' ? 'active' : ''}`}
+            onClick={() => setActiveScene('upload')}
+          >
+            <div className="link-content">
+              <img src={uploadImage} alt="upload" className="icon" />
+              <span>Upload</span>
+            </div>
+          </div>
+          {/* Logout */}
+          <div
+            role="button"
+            className="clickable-link"
+            onClick={handleLogout}
+          >
+            <div className="link-content">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16,17 21,12 16,7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Logout</span>
             </div>
           </div>
         </div>
 
         <div className="user-profile">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/147/147144.png"
-            alt="User"
-            className="avatar"
-          />
-          <div className="points-display">
-            <img src={coinsImage} alt="coins" className="coins-icon" />
-            <span>{points} points</span>
+          {(userRole === 'moderator' || userRole === 'admin') && (
+            <div className="moderator-label">Moderator</div>
+          )}
+          <div className="username-display" onClick={handleUsernameClick} style={{ cursor: 'pointer', marginBottom: '8px' }}>
+            <span style={{ fontSize: '14px', color: '#666' }}>
+              {currentUser?.username ? `@${currentUser.username}` : 'Set username'}
+            </span>
           </div>
-          <div className="username">Keenan</div>
         </div>
       </aside>
 
       <main className="main-content">
-        <header className="header flex items-center gap-2">
-          <div className="search-bar-container">
-            <select
-              className="appearance-none px-3 py-2 text-sm border-r border-gray-200 focus:outline-none bg-white"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-              style={{ border: 'none', background: 'transparent', borderRadius: '9999px 0 0 9999px' }}
-            >
-              <option value="file">File</option>
-              <option value="channel">Channel</option>
-            </select>
-            <input
-              type="text"
-              className="search-bar-input"
-              placeholder="Search your topic here..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-            />
-            <span className="search-bar-icon" onClick={handleSearch} style={{ cursor: 'pointer' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </span>
+        {/* Filter controls at the top, next to sidebar */}
+        {(activeScene === 'home' || activeScene === 'result') && (
+          <div className="searchbar-row" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="segmented-toggle">
+              <label className={searchType === 'file' ? 'selected' : ''}>
+                <input
+                  type="radio"
+                  name="searchType"
+                  value="file"
+                  checked={searchType === 'file'}
+                  onChange={(e) => setSearchType(e.target.value)}
+                />
+                Files
+              </label>
+              <label className={searchType === 'channel' ? 'selected' : ''}>
+                <input
+                  type="radio"
+                  name="searchType"
+                  value="channel"
+                  checked={searchType === 'channel'}
+                  onChange={(e) => setSearchType(e.target.value)}
+                />
+                Channels
+              </label>
+            </div>
+            <div className="search-bar-container" style={{ flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Search for files, channels..."
+                className="search-bar-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <div className="search-bar-icon" onClick={handleSearch}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </div>
+            </div>
+            {(activeScene === 'result') ? (
+              <button 
+                onClick={() => setActiveScene('home')}
+                className="dashboard-button secondary refresh-btn"
+                style={{ position: 'static', marginLeft: '8px', marginTop: 0 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+            ) : (
+              <button 
+                onClick={fetchHomePageData}
+                className="dashboard-button secondary refresh-btn"
+                style={{ position: 'static', marginLeft: '8px', marginTop: 0 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4a9 9 0 0 1-14.85 3.36L23 14"/>
+                </svg>
+                Refresh
+              </button>
+            )}
           </div>
-        </header>
-
-{activeScene === 'channels' && <Channels key={channelsVersion} />}
-{activeScene === 'upload'   && <Upload />}
-{activeScene === 'create'   && <Create onChannelCreated={() => setChannelsVersion(v => v + 1)} />}
-{activeScene === 'result'   && (
-  <Result searchQuery={searchQuery} searchType={searchType} results={searchResults} />
-)}
-{!['channels','upload','create','result'].includes(activeScene) && (
-  <section className="dashboard">
-    <div className="subscribed">
-      <div
-        className="upload-box clickable-panel"
-        onClick={() => setActiveScene('create')}
-      >
-        <img src={createImage} alt="create channel" />
-        <h3>Create Your Channel</h3>
-        <p>Build your own community and start sharing content now!</p>
-      </div>
-    </div>
-
-    <div
-      className="upload-box clickable-panel"
-      onClick={() => setActiveScene('upload')}
-    >
-      <img src={uploadImage} alt="upload" />
-      <h3>Upload Your Documents</h3>
-      <p>Start helping others by uploading your own documents here!</p>
-    </div>
-
-            <div className="recent-activity">
-              <h4>Your Recent Activity</h4>
-              <div className="activity">
-                <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Felix" />
-                <div>
-                  <strong>Felix</strong> has replied on<br />
-                  <strong>At aliquam emin in cras arcu</strong>
-                  <p>Lorem ipsum dolor sit amet...</p>
-                </div>
-              </div>
-              <div className="activity">
-                <img src="https://randomuser.me/api/portraits/men/2.jpg" alt="Jonathon" />
-                <div>
-                  <strong>Jonathon</strong> has commented on<br />
-                  <strong>Venenatis aliquam sit pellentesque...</strong>
-                  <p>Lorem ipsum dolor sit amet...</p>
-                </div>
-              </div>
-              <div className="activity">
-                <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Ludwig" />
-                <div>
-                  <strong>Ludwig</strong> has invited you to<br />
-                  <strong>Imperdiet enim est, varius faucibus.</strong>
-                  <p>📅 25th Sep. ⏰ 11.00 am</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="saved-docs">
-              <h4>Your saved document</h4>
-              <ul className="no-bullets">
-                <li>Assignment 2 for 2DV608</li>
-                <li>Manual for JMT file</li>
-                <li>Help me with this assignment!!!</li>
-              </ul>
-            </div>
-          </section>
         )}
+
+        {activeScene === 'home' && (
+          <div className="home-container">
+            {/* Header Section */}
+            <div className="home-header">
+              <div className="welcome-section">
+                <h1 className="welcome-title">Welcome to Edora</h1>
+                <p className="welcome-subtitle">Your collaborative document sharing platform</p>
+              </div>
+            </div>
+
+            {/* Main actions + leaderboard row */}
+            <div className="dashboard-main-row">
+              <div className="dashboard-main-col">
+                <h2 className="section-title">Quick Actions</h2>
+                <div className="quick-actions-grid">
+                  <div
+                    className="action-card upload-card"
+                    onClick={() => setActiveScene('upload')}
+                  >
+                    <div className="action-icon">
+                      <img src={uploadImage} alt="upload" />
+                    </div>
+                    <h3>Upload Files</h3>
+                    <p>Share your documents and files with the community</p>
+                  </div>
+                  <div
+                    className="action-card create-card"
+                    onClick={() => setActiveScene('create')}
+                  >
+                    <div className="action-icon">
+                      <img src={createImage} alt="create" />
+                    </div>
+                    <h3>Create Channel</h3>
+                    <p>Start a new channel for your community</p>
+                  </div>
+                  <div
+                    className="action-card channels-card"
+                    onClick={() => setActiveScene('channels')}
+                  >
+                    <div className="action-icon">
+                      <img src={channelImage} alt="channels" />
+                    </div>
+                    <h3>Browse Channels</h3>
+                    <p>Explore and join existing channels</p>
+                  </div>
+                  <div
+                    className="action-card saved-card"
+                    onClick={() => setActiveScene('saved')}
+                  >
+                    <div className="action-icon">
+                      <img src={saveImage} alt="saved" />
+                    </div>
+                    <h3>Saved Posts</h3>
+                    <p>Access your saved documents</p>
+                  </div>
+                </div>
+                <div className="dashboard-content">
+                  <div className="dashboard-grid">
+                    {/* Saved Documents */}
+                    <div className="dashboard-card saved-docs">
+                      <div className="card-header">
+                        <h3>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                          </svg>
+                          Saved Documents
+                        </h3>
+                        <span className="item-count">{savedDocuments.length}</span>
+                      </div>
+                      <div className="card-content">
+                        {savedDocuments.length > 0 ? (
+                          <>
+                            <div className="item-list">
+                              {savedDocuments.slice(0, 3).map((doc) => (
+                                <div 
+                                  key={doc.id}
+                                  className="list-item"
+                                  onClick={() => handlePostClick(doc.id)}
+                                >
+                                  <div className="item-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <path d="M14 2v6h6" />
+                                    </svg>
+                                  </div>
+                                  <span className="item-title">{doc.title}</span>
+                                </div>
+                              ))}
+                            </div>
+                            {savedDocuments.length > 3 && (
+                              <button 
+                                onClick={() => setActiveScene('saved')}
+                                className="view-all-btn"
+                              >
+                                View All ({savedDocuments.length})
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <div className="empty-state">
+                            <p>No saved documents yet</p>
+                            <small>Save posts to see them here</small>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Your Stats (replacing Available Channels) */}
+                    <div className="dashboard-card stats-card">
+                      <div className="card-header">
+                        <h3>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM19 4h-4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                          </svg>
+                          Your Stats
+                        </h3>
+                      </div>
+                      <div className="card-content">
+                        <div className="stats-grid">
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{savedDocuments.length}</span>
+                            <span className="stat-label">Saved</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                              </svg>
+                            </span>
+                            <span className="stat-number">{userJoinedChannels.length}</span>
+                            <span className="stat-label">Channels</span>
+                          </div>
+                          <div className="stat-item">
+                            <span className="stat-icon">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#4f46e5">P</text>
+                              </svg>
+                            </span>
+                            <span className="stat-number">{points}</span>
+                            <span className="stat-label">Points</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="dashboard-leaderboard-col">
+                <div className="leaderboard-card sticky-leaderboard">
+                  <div className="your-points-section">
+                    <div className="points-header">
+                      <span>Your Points</span>
+                      <button className="points-menu-btn">⋮</button>
+                    </div>
+                    <div className="points-avatar-progress">
+                      <div className="points-avatar-ring">
+                        <img src={avatarImg} alt="avatar" className="points-avatar" />
+                      </div>
+                      <div className="points-value">{points} Points</div>
+                      <div className="points-desc">Continue Your Journey And Achieve Your Target</div>
+                    </div>
+                  </div>
+                  <div className="leaderboard-list-section">
+                    <div className="leaderboard-header-row">
+                      <span>Leaderboard</span>
+                      <button className="leaderboard-add-btn">+</button>
+                    </div>
+                    <div className="leaderboard-list-modern">
+                      {leaderboard.map((user, idx) => (
+                        <div className="leaderboard-modern-item" key={user.id}>
+                          <span className="leaderboard-rank-badge">{idx + 1}</span>
+                          <span className="leaderboard-modern-name">{user.name}</span>
+                          <span className="leaderboard-modern-points">{typeof user.points === 'number' ? user.points : 0} Points</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeScene === 'upload' && <Upload />}
+        {activeScene === 'create' && (
+          <Create onChannelCreated={() => setChannelsVersion(prev => prev + 1)} />
+        )}
+        {activeScene === 'channels' && (
+          <Channels 
+            key={channelsVersion} 
+            onChannelClick={handleChannelClick}
+            onCreateClick={() => setActiveScene('create')}
+            view={channelsView}
+            userRole={userRole}
+          />
+        )}
+        {activeScene === 'channel-view' && selectedChannelId && (
+          <ChannelView 
+            channelId={selectedChannelId}
+            onPostClick={handlePostClick}
+            onBack={handleBackToChannels}
+            userRole={userRole}
+            currentUser={currentUser}
+          />
+        )}
+        {activeScene === 'post-view' && selectedPostId && (
+          <PostDetailView 
+            postId={selectedPostId}
+            onBack={handleBackFromPost}
+            onSaveChange={fetchHomePageData}
+            userRole={userRole}
+          />
+        )}
+        {activeScene === 'saved' && (
+          <SavedPosts 
+            onPostClick={handlePostClick}
+            onBack={() => setActiveScene('home')}
+          />
+        )}
+        {activeScene === 'result' && (
+          <Result
+            searchQuery={lastSearchedQuery}
+            searchType={searchType}
+            results={searchResults}
+            onBack={() => setActiveScene('home')}
+            onChannelClick={(channelId) => {
+              setSelectedChannelId(channelId);
+              setSelectedPostId(null);
+              setActiveScene('channel-view');
+            }}
+          />
+        )}
+
+        {/* Placeholder content for other scenes */}
+        {activeScene === 'messages' && (
+          <div className="placeholder-content">
+            <h2>Messages</h2>
+            <p>Message functionality coming soon...</p>
+          </div>
+        )}
+        {activeScene === 'notifications' && (
+          <div className="placeholder-content">
+            <h2>Notifications</h2>
+            <p>Notifications functionality coming soon...</p>
+          </div>
+        )}
+        {activeScene === 'settings' && (
+          <div className="placeholder-content">
+            <h2>Settings</h2>
+            <p>Settings functionality coming soon...</p>
+          </div>
+        )}
+        {activeScene === 'moderator' && <ModeratorPanel />}
       </main>
+
+      {/* Username Modal */}
+      {showUsernameModal && (
+        <div className="modal-overlay" onClick={() => setShowUsernameModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Set Your Username</h3>
+              <button 
+                className="modal-close"
+                onClick={() => setShowUsernameModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Choose a username that other users will see on the leaderboard:</p>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="Enter your username"
+                maxLength={50}
+                className="username-input"
+                onKeyPress={(e) => e.key === 'Enter' && !isUpdatingUsername && updateUsername()}
+              />
+              <div className="modal-actions">
+                <button 
+                  onClick={() => setShowUsernameModal(false)}
+                  className="modal-btn secondary"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={updateUsername}
+                  disabled={isUpdatingUsername}
+                  className="modal-btn primary"
+                >
+                  {isUpdatingUsername ? 'Updating...' : 'Update Username'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

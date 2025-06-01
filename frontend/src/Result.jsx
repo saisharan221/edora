@@ -3,24 +3,14 @@ import React, { useState } from 'react';
 import './Result.css';
 import PostDetail from './PostDetail';
 
-function Result({ searchQuery, searchType, results = [], onBack }) {
+function Result({ searchQuery, searchType, results = [], onBack, onChannelClick }) {
   const [selectedPost, setSelectedPost] = useState(null);
-
-  if (!searchQuery) {
-    return (
-      <div className="result-container">
-        <div className="empty-state">
-          <h2>Enter a search query to find posts and channels</h2>
-        </div>
-      </div>
-    );
-  }
 
   if (results.length === 0) {
     return (
       <div className="result-container">
         <div className="empty-state">
-          <h2>No results found for "{searchQuery}"</h2>
+          <h2>No results found</h2>
           <p>Try different keywords or search terms</p>
         </div>
       </div>
@@ -40,9 +30,11 @@ function Result({ searchQuery, searchType, results = [], onBack }) {
   // Otherwise show the search results
   return (
     <div className="result-container">
-      <div className="result-header">
-        <h2>Search Results for "{searchQuery}"</h2>
-      </div>
+      {results.length > 0 && (
+        <div className="result-header">
+          <h2>Showing results for "{searchQuery}"</h2>
+        </div>
+      )}
 
       <div className="result-list">
         {searchType === 'file' ? (
@@ -88,7 +80,12 @@ function Result({ searchQuery, searchType, results = [], onBack }) {
           ))
         ) : (
           results.map((channel) => (
-            <div key={channel.id} className="result-item">
+            <div
+              key={channel.id}
+              className="result-item clickable"
+              onClick={() => onChannelClick && onChannelClick(channel.id)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="result-content">
                 <h3>{channel.name}</h3>
                 <p>{channel.bio}</p>

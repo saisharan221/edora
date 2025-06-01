@@ -1,0 +1,340 @@
+/* ChannelView.css */
+
+.channel-view-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 12px 48px 0 rgba(123,47,242,0.08);
+  padding: 0 0 3.5rem 0;
+  overflow: hidden;
+}
+
+.channel-view-container .channel-header {
+  background: linear-gradient(135deg, #7060b7 0%, #382f8e 100%);
+  padding: 3rem 3.5rem 2.5rem 3.5rem;
+  position: relative;
+  display: block;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  box-shadow: 0 4px 24px 0 rgba(106,95,199,0.12);
+}
+
+.channel-view-container .back-button {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.channel-view-container .back-button:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.channel-view-container .channel-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.8rem;
+  margin: 0 auto;
+  max-width: 700px;
+  position: relative;
+}
+
+.channel-view-container .channel-title {
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.channel-view-container .channel-bio {
+  color: rgba(255,255,255,0.9);
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.channel-view-container .channel-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  color: rgba(255,255,255,0.8);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.channel-view-container .leave-channel-button {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.channel-view-container .leave-channel-button:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.channel-view-container .posts-container {
+  padding: 3rem 3.5rem 0 3.5rem;
+}
+
+.channel-view-container .posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.channel-view-container .post-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(123,47,242,0.06);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(123,47,242,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.channel-view-container .post-card:hover {
+  box-shadow: 0 8px 32px rgba(123,47,242,0.12);
+  transform: translateY(-4px);
+  border-color: rgba(123,47,242,0.15);
+}
+
+.channel-view-container .post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.channel-view-container .post-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.channel-view-container .post-date {
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.channel-view-container .post-content {
+  color: #4a4a4a;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.channel-view-container .post-attachments {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #3a30ff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+}
+
+.channel-view-container .attachment-icon {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.channel-view-container .post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(123,47,242,0.08);
+}
+
+.channel-view-container .post-author {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #3a30ff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.channel-view-container .author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3a30ff 0%, #ff5f33 100%);
+  display: inline-block;
+}
+
+.channel-view-container .post-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.channel-view-container .action-button {
+  background: none;
+  border: none;
+  color: #3a30ff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.4rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.channel-view-container .action-button:hover {
+  background: rgba(58,48,255,0.08);
+  transform: translateY(-1px);
+}
+
+.channel-view-container .read-more {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.channel-view-container .loading-container,
+.channel-view-container .error-container,
+.channel-view-container .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #3a30ff;
+  text-align: center;
+  padding: 2rem;
+}
+
+.channel-view-container .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(58,48,255,0.1);
+  border-top: 3px solid #3a30ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+.channel-view-container .empty-icon {
+  width: 64px;
+  height: 64px;
+  color: rgba(58,48,255,0.2);
+  margin-bottom: 1.5rem;
+}
+
+.channel-view-container .empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+}
+
+.channel-view-container .empty-state p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0;
+}
+
+/* Edit form styles */
+.create-channel-input,
+.create-channel-textarea {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  color: #fff;
+  font-size: 1rem;
+  width: 100%;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.create-channel-input:focus,
+.create-channel-textarea:focus {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.3);
+  outline: none;
+}
+
+.create-channel-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.create-channel-btn {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.create-channel-btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+
+.create-channel-error {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.create-channel-success {
+  color: #4dff4d;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+} 

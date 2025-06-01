@@ -16,14 +16,12 @@ app.mount(
 
 init_db()
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+# Allow all origins for development
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # you can use ["*"] during dev if easier
+    allow_origins=origins,        # allow all origins
     allow_credentials=True,
     allow_methods=["*"],          # GET, POST, OPTIONS, etc.
     allow_headers=["*"],

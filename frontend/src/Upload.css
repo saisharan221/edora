@@ -1,0 +1,222 @@
+/* CreatePost.css */
+.create-post-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+}
+
+.create-post-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(60, 60, 120, 0.08);
+  padding: 36px 32px 32px 32px;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.create-post-main-title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #6a5fc7;
+  margin-bottom: 0.2em;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+.create-post-tagline {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 1.7em;
+  width: 100%;
+  text-align: left;
+}
+.create-post-form-2col {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.create-post-row {
+  display: flex;
+  gap: 100px;
+  width: 100%;
+}
+.create-post-col {
+  display: flex;
+  flex-direction: column;
+}
+.create-post-col.title {
+  flex: 3 1 0%;
+}
+.create-post-col.channel {
+  flex: 1 1 0%;
+  min-width: 120px;
+  max-width: 220px;
+}
+.create-post-label {
+  font-weight: 600;
+  margin-bottom: 7px;
+  color: #22223b;
+  font-size: 1.05rem;
+  text-align: left;
+  width: 100%;
+  display: block;
+}
+.create-post-input.outline, .create-post-textarea.outline {
+  border: 2px solid #beb9ec;;
+  width: 95%;
+  border-radius: 8px;
+  padding: 13px 14px;
+  font-size: 1rem;
+  outline: none;
+  background: #f8fafc;
+  font-family: inherit;
+  margin-bottom: 2px;
+  transition: border 0.2s;
+}
+.create-post-input.outline:focus, .create-post-textarea.outline:focus {
+  border: 2px solid #6a5fc7;
+}
+.create-post-textarea.outline {
+  min-height: 90px;
+  font-size: 1.08rem;
+}
+.create-post-files-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.create-post-preview-label {
+  font-weight: 600;
+  margin: 1.2em 0 0.5em 0;
+  color: #22223b;
+  font-size: 1.05rem;
+  text-align: center;
+}
+.create-post-preview-card {
+  background: #f6f3fd;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(123,47,242,0.07);
+  padding: 22px 24px 18px 24px;
+  margin: 0 auto 0.5em auto;
+  max-width: 320px;
+  text-align: center;
+  border: 1.5px solid #e5e7eb;
+}
+.create-post-preview-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #22223b;
+  margin-bottom: 0.2em;
+}
+.create-post-preview-bio {
+  color: #6a5fc7;
+  font-size: 1.05rem;
+}
+.create-post-preview-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 1em;
+}
+.create-post-preview-join, .create-post-preview-delete {
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  background: #ede7fa;
+  color: #6a5fc7;
+  transition: background 0.2s, color 0.2s;
+}
+.create-post-preview-join:hover, .create-post-preview-delete:hover {
+  background: #6a5fc7;
+  color: #fff;
+}
+.create-post-error {
+  color: #ef4444;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.create-post-btn-wide {
+  width: 100%;
+  border-radius: 8px;
+  background: #6a5fc7;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.08rem;
+  padding: 13px 0;
+  border: none;
+  margin-top: 2px;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.create-post-btn-wide:hover {
+  background: #4b3ca7;
+}
+.create-post-wide {
+  max-width: 800px;
+}
+.create-post-preview-files {
+  margin: 1em 0 0.5em 0;
+  text-align: left;
+}
+.create-post-preview-files-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.create-post-preview-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.98rem;
+  color: #444;
+  margin-bottom: 4px;
+}
+.create-post-preview-file-item .file-icon {
+  font-size: 1.1rem;
+}
+.create-post-preview-file-item .file-name {
+  font-weight: 500;
+  color: #22223b;
+}
+.create-post-preview-file-item .file-size {
+  color: #6a5fc7;
+  font-size: 0.92rem;
+}
+.no-files {
+  color: #aaa;
+  font-size: 0.95rem;
+}
+.create-post-preview-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 1em 0 0.5em 0;
+  justify-content: center;
+}
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ede7fa;
+  color: #6a5fc7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.username {
+  color: #6a5fc7;
+  font-weight: 600;
+  font-size: 1rem;
+} 

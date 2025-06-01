@@ -1,5 +1,6 @@
 // src/Upload.jsx
 import React, { useState, useEffect } from 'react';
+import './Upload.css';
 
 export default function Upload() {
   const [title, setTitle] = useState('');
@@ -9,6 +10,7 @@ export default function Upload() {
   const [selectedChannel, setSelectedChannel] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [username, setUsername] = useState('');
 
   const token = localStorage.getItem('access_token');
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -44,6 +46,15 @@ export default function Upload() {
       .finally(() => {
         setLoading(false);
       });
+
+    // Fetch username from backend
+    if (token) {
+      fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setUsername(data.username || 'yourusername'));
+    }
   }, []);
 
   const handleFileChange = (e) => {
@@ -141,109 +152,85 @@ export default function Upload() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="container bg-white p-4 sm:p-8 lg:p-12 rounded-xl shadow max-w-xl mx-auto"
-    >
-      <h2 className="text-2xl sm:text-3xl font-semibold text-blue-600 text-center mb-6">
-        Create a New Post
-      </h2>
-
-      {/* Channel selector */}
-      <div className="mb-4">
-        <label htmlFor="channel" className="block font-semibold mb-1">
-          Channel
-        </label>
-        <select
-          id="channel"
-          value={selectedChannel}
-          onChange={(e) => setSelectedChannel(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          required
-        >
-          <option value="" disabled>
-            — Select a channel —
-          </option>
-          {channels.map((ch) => (
-            <option key={ch.id} value={ch.id}>
-              {ch.name} {ch.bio ? `(${ch.bio})` : ''}
-            </option>
-          ))}
-        </select>
-        {channels.length === 0 && (
-          <p className="mt-2 text-sm text-gray-600">
-            You haven't created any channels yet.{' '}
-            <button
-              type="button"
-              onClick={() => window.location.href = '/create'}
-              className="text-blue-600 hover:underline"
-            >
-              Create one now
-            </button>
-          </p>
-        )}
+    <div className="create-post-bg">
+      <div className="create-post-card create-post-wide">
+        <h1 className="create-post-main-title">Create a New Post</h1>
+        <div className="create-post-tagline">Share your knowledge or questions with the community.</div>
+        <form onSubmit={handleSubmit} className="create-post-form-2col">
+          <div className="create-post-row">
+            <div className="create-post-col title">
+              <label className="create-post-label">Title</label>
+              <input
+                className="create-post-input outline"
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Write your post title here..."
+                required
+              />
+            </div>
+            <div className="create-post-col channel">
+              <label className="create-post-label">Channel</label>
+              <select
+                className="create-post-input outline"
+                value={selectedChannel}
+                onChange={e => setSelectedChannel(e.target.value)}
+                required
+              >
+                <option value="" disabled>— Select a channel —</option>
+                {channels.map((ch) => (
+                  <option key={ch.id} value={ch.id}>{ch.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="create-post-files-row">
+            <label className="create-post-label">Attachments</label>
+            <input
+              className="create-post-input outline"
+              type="file"
+              multiple
+              onChange={handleFileChange}
+            />
+          </div>
+          <div>
+            <label className="create-post-label">Description</label>
+            <textarea
+              className="create-post-textarea outline"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Write your description or question here..."
+              rows={5}
+            />
+          </div>
+          <div className="create-post-preview-label">Post Preview</div>
+          <div className="create-post-preview-card">
+            <div className="create-post-preview-title">{title || 'Default Post Title'}</div>
+            <div className="create-post-preview-bio">{description || 'Default post description.'}</div>
+            <div className="create-post-preview-files">
+              {files.length > 0 ? (
+                <ul className="create-post-preview-files-list">
+                  {files.map((file, idx) => (
+                    <li key={idx} className="create-post-preview-file-item">
+                      <span className="file-icon" role="img" aria-label="file">📎</span>
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="no-files">No files attached</span>
+              )}
+            </div>
+            <div className="create-post-preview-user">
+              <span className="avatar-circle">U</span>
+              <span className="username">@{username}</span>
+            </div>
+          </div>
+          {error && <div className="create-post-error">{error}</div>}
+          <button type="submit" className="create-post-btn-wide">Create your Post</button>
+        </form>
       </div>
-
-      {/* Title */}
-      <div className="mb-4">
-        <label htmlFor="title" className="block font-semibold mb-1">
-          Title
-        </label>
-        <input
-          id="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Post title…"
-          required
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-        />
-      </div>
-
-      {/* Description */}
-      <div className="mb-4">
-        <label htmlFor="desc" className="block font-semibold mb-1">
-          Description
-        </label>
-        <textarea
-          id="desc"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Write your description here…"
-          rows={4}
-          required
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-        />
-      </div>
-
-      {/* File upload */}
-      <div className="mb-6">
-        <label htmlFor="files" className="block font-semibold mb-1">
-          Attach files
-        </label>
-        <input
-          id="files"
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          className="w-full"
-        />
-        <p className="mt-1 text-xs text-slate-500">
-          Max 5 files, 10 MB each (jpg, png, svg, zip)
-        </p>
-      </div>
-
-      <button
-        type="submit"
-        disabled={channels.length === 0}
-        className={`w-full rounded-lg px-6 py-3 font-semibold text-white ${
-          channels.length === 0
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {channels.length === 0 ? 'Create a Channel First' : 'Submit Post'}
-      </button>
-    </form>
+    </div>
   );
 }

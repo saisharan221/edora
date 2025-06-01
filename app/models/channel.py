@@ -2,8 +2,7 @@ import datetime as dt
 from typing import List, Optional, TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
-
-
+from .association_tables import channel_user_link
 
 if TYPE_CHECKING:
     from .user import User
@@ -45,3 +44,13 @@ class Channel(SQLModel, table=True):
     )
 
     posts: List["Post"] = Relationship(back_populates="channel")
+    users: List["User"] = Relationship(
+        back_populates="joined_channels",
+        sa_relationship_kwargs={"secondary": "channel_user_link"}
+    )
+
+class ChannelUpdate(SQLModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    logo_filename: Optional[str] = None
+    # Add tags or other fields if needed
