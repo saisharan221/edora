@@ -432,15 +432,15 @@ function App() {
         </nav>
 
         <div className="bottom-links">
-          {/* Create */}
+          {/* Upload */}
           <div
             role="button"
-            className={`clickable-link ${activeScene === 'create' ? 'active' : ''}`}
-            onClick={() => setActiveScene('create')}
+            className={`clickable-link ${activeScene === 'upload' ? 'active' : ''}`}
+            onClick={() => setActiveScene('upload')}
           >
             <div className="link-content">
-              <img src={createImage} alt="create" className="icon" />
-              <span>Create</span>
+              <img src={uploadImage} alt="upload" className="icon" />
+              <span>Upload</span>
             </div>
           </div>
           {/* Logout */}

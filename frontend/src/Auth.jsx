@@ -160,10 +160,6 @@ export default function Auth({ onLogin }) {
           >
             {loading ? (
               <div className="loading-spinner">
-                <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-                {isLogin ? 'Signing in...' : 'Creating account...'}
               </div>
             ) : (
               isLogin ? 'Sign In' : 'Create Account'

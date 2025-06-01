@@ -147,6 +147,7 @@
   border-radius: 10px;
   padding: 12px 16px;
   transition: border 0.2s;
+  color: #000;
 }
 .create-channel-input.outline:focus, .create-channel-textarea.outline:focus {
   border: 2px solid #6a5fc7;
