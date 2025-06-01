@@ -136,10 +136,10 @@ This section provides step-by-step instructions to test all major features of th
 
 ###  Moderation Features (Admin/Moderator Only)
 1. **Login as Moderator**: Use `moderator@example.com` / `moderator`
-2. **View Flagged Content**: Access flagged posts dashboard
+2. **View Flagged Content**: Access moderator panel dashboard
 3. **Approve/Reject**: Moderate flagged content
 4. **Delete Posts**: Remove inappropriate content
-5. **User Management**: Monitor user activities
+
 
 ###  File Upload & Management
 1. **Upload Files**: 
