@@ -873,7 +873,7 @@ textarea::placeholder {
   border-radius: 16px;
   padding: 0.3rem 1rem;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .action-card {

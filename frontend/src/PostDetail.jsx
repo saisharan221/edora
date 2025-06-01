@@ -54,26 +54,14 @@ function PostDetail({ post, onClose }) {
                         className="file-preview-image"
                       />
                     ) : file.mime_type === 'application/pdf' ? (
-                      <>
-                        <iframe
-                          src={`${API}/files/${file.filename}`}
-                          title={file.filename.split('/').pop()}
-                          className="file-preview-pdf"
-                          width="100%"
-                          height="200px"
-                          style={{ border: 'none', borderRadius: '8px', background: '#fff' }}
-                        />
-                        <div style={{textAlign: 'center', marginTop: 8}}>
-                          <a
-                            href={`${API}/files/${file.filename}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="download-button"
-                          >
-                            Open PDF in new tab
-                          </a>
-                        </div>
-                      </>
+                      <iframe
+                        src={`${API}/files/${file.filename}`}
+                        title={file.filename.split('/').pop()}
+                        className="file-preview-pdf"
+                        width="100%"
+                        height="200px"
+                        style={{ border: 'none', borderRadius: '8px', background: '#fff' }}
+                      />
                     ) : (
                       <div className="file-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

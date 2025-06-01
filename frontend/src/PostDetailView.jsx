@@ -218,8 +218,10 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
       });
 
       if (response.ok) {
+        const newComment = await response.json();
         setCommentText('');
-        fetchComments(); // Refresh comments
+        setComments((prev) => [...prev, newComment]);
+        fetchComments(); // Optionally refresh to get author info
       } else {
         console.error('Failed to post comment');
       }
@@ -367,6 +369,15 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
                             alt={file.filename.split('/').pop()}
                             className="attachment-image"
                           />
+                        ) : file.mime_type === 'application/pdf' ? (
+                          <iframe
+                            src={`${API}/files/${file.filename}`}
+                            title={file.filename.split('/').pop()}
+                            className="file-preview-pdf"
+                            width="100%"
+                            height="200px"
+                            style={{ border: 'none', borderRadius: '8px', background: '#fff' }}
+                          />
                         ) : (
                           <div className="file-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -379,7 +390,7 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
                           </div>
                         )}
                       </div>
-                      <div className="attachment-info">
+                      <div className="attachment-info" style={{ marginTop: 16 }}>
                         <span className="file-name">{file.filename.split('/').pop()}</span>
                         <span className="file-size">{formatFileSize(file.size)}</span>
                         <a

@@ -12,6 +12,7 @@ from app.api.auth import current_user
 from app.models.user import User
 from app.models.association_tables import channel_user_link
 from app.core.dependencies import require_moderator
+from app.models.media_file import MediaFile
 
 router = APIRouter(prefix="/channels", tags=["channels"])
 
@@ -183,6 +184,10 @@ def list_channel_posts(
     # Convert to PostWithAuthor objects
     posts = []
     for row in results:
+        # Get files for this post
+        files = session.exec(
+            select(MediaFile).where(MediaFile.post_id == row.id)
+        ).all()
         post = PostWithAuthor(
             id=row.id,
             title=row.title,
@@ -193,7 +198,7 @@ def list_channel_posts(
             updated_at=row.updated_at,
             author_email=row.author_email,
             author_username=row.author_username,
-            files=[],  # Will be populated separately if needed
+            files=[file.dict() for file in files],
             like_count=0,  # Will be populated separately if needed
             dislike_count=0,  # Will be populated separately if needed
             is_saved=False  # Will be populated separately if needed

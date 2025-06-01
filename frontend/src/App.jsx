@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import Auth from './Auth';
-import uploadImage from './assets/upload.jpg';
+import uploadImage from './assets/upload.png';
 import edoraImage from './assets/edora.png';
 import homeImage from './assets/dashboard.png';
 import channelImage from './assets/channel.png';

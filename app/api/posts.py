@@ -13,6 +13,7 @@ from app.core.dependencies import require_moderator
 from app.models.flagged_word import FlaggedWord
 from app.gamification.service import GamificationService
 from app.gamification.models import ActionType
+from app.models.media_file import MediaFile
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -158,6 +159,11 @@ def get_post(
             detail="Post not found"
         )
     
+    # Get files for this post
+    files = session.exec(
+        select(MediaFile).where(MediaFile.post_id == result.id)
+    ).all()
+    
     # Create PostWithAuthor object
     post_with_author = PostWithAuthor(
         id=result.id,
@@ -169,7 +175,7 @@ def get_post(
         updated_at=result.updated_at,
         author_email=result.author_email,
         author_username=result.author_username,
-        files=[],  # Will be populated separately if needed
+        files=[file.dict() for file in files],
         like_count=0,  # Will be populated separately if needed
         dislike_count=0,  # Will be populated separately if needed
         is_saved=False  # Will be populated separately if needed
