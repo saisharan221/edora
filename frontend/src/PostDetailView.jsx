@@ -319,29 +319,39 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
             <h1 className="post-title">
               {post.title}
               {(userRole === 'moderator' || userRole === 'admin') && (
-                <button onClick={handleDelete} style={{ color: 'red', marginLeft: 16, fontSize: '1rem', background: 'none', border: 'none', cursor: 'pointer' }}>Delete Post</button>
+                <button
+                  onClick={handleDelete}
+                  style={{ color: '#ef4444', marginLeft: 20, fontSize: '1rem', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: '0.2em 0.7em', borderRadius: 8, transition: 'background 0.18s' }}
+                  onMouseOver={e => (e.currentTarget.style.background = '#fef2f2')}
+                  onMouseOut={e => (e.currentTarget.style.background = 'none')}
+                >
+                  Delete Post
+                </button>
               )}
             </h1>
             <div className="post-meta">
               <div className="author-info">
-                <div className="author-avatar"></div>
+                <div className="author-avatar" title={post.author_username || post.author_email}>
+                  {post.author_username
+                    ? post.author_username.charAt(0).toUpperCase()
+                    : (post.author_email?.charAt(0).toUpperCase() || '?')}
+                </div>
                 <div>
                   <span className="author-name">
-                    {post.author_username 
-                      ? `@${post.author_username}` 
-                      : post.author_email?.split('@')[0] || `User #${post.author_id}`
-                    }
+                    {post.author_username
+                      ? `@${post.author_username}`
+                      : post.author_email?.split('@')[0] || `User #${post.author_id}`}
                   </span>
                   <span className="post-date">{formatDate(post.created_at)}</span>
                 </div>
               </div>
-              <button 
+              <button
                 className={`save-button ${isSaved ? 'saved' : ''}`}
                 onClick={handleSave}
                 disabled={saveLoading}
                 title={isSaved ? 'Unsave post' : 'Save post'}
               >
-                <svg viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
                   <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                 </svg>
                 {isSaved ? 'Saved' : 'Save'}
@@ -358,14 +368,15 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
 
             {post.files && post.files.length > 0 && (
               <div className="post-attachments">
+                <div style={{ borderTop: '1.5px solid #ecebfa', marginBottom: 24, marginTop: 0 }}></div>
                 <h3>Attachments</h3>
                 <div className="attachments-grid">
                   {post.files.map((file) => (
                     <div key={file.id} className="attachment-card">
                       <div className="attachment-preview">
                         {file.mime_type?.startsWith('image/') ? (
-                          <img 
-                            src={`${API}/files/${file.filename}`} 
+                          <img
+                            src={`${API}/files/${file.filename}`}
                             alt={file.filename.split('/').pop()}
                             className="attachment-image"
                           />
@@ -471,14 +482,17 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="comment">
-                  <div className="comment-avatar"></div>
+                  <div className="comment-avatar" title={comment.author_username || comment.author_email}>
+                    {comment.author_username
+                      ? comment.author_username.charAt(0).toUpperCase()
+                      : (comment.author_email?.charAt(0).toUpperCase() || '?')}
+                  </div>
                   <div className="comment-content">
                     <div className="comment-header">
                       <span className="comment-author">
-                        {comment.author_username 
-                          ? `@${comment.author_username}` 
-                          : comment.author_email?.split('@')[0] || `User #${comment.author_id}`
-                        }
+                        {comment.author_username
+                          ? `@${comment.author_username}`
+                          : comment.author_email?.split('@')[0] || `User #${comment.author_id}`}
                       </span>
                       <span className="comment-date">{formatDate(comment.created_at)}</span>
                     </div>

@@ -1,5 +1,6 @@
 // src/Upload.jsx
 import React, { useState, useEffect } from 'react';
+import './Upload.css';
 
 export default function Upload() {
   const [title, setTitle] = useState('');
@@ -9,6 +10,7 @@ export default function Upload() {
   const [selectedChannel, setSelectedChannel] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [username, setUsername] = useState('');
 
   const token = localStorage.getItem('access_token');
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
@@ -44,6 +46,15 @@ export default function Upload() {
       .finally(() => {
         setLoading(false);
       });
+
+    // Fetch username from backend
+    if (token) {
+      fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.json())
+        .then(data => setUsername(data.username || 'yourusername'));
+    }
   }, []);
 
   const handleFileChange = (e) => {
@@ -141,258 +152,85 @@ export default function Upload() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xl mx-auto"
-      style={{
-        padding: 0,
-        marginTop: 0,
-        marginBottom: 56,
-        position: 'relative',
-      }}
-    >
-      <div style={{
-        background: 'linear-gradient(135deg, #6d7fc9 0%, #6a5fc7 100%)',
-        padding: '2rem 0 1.5rem 0',
-        textAlign: 'center',
-        marginBottom: 0,
-        marginTop: 0,
-      }}>
-        <h2 style={{
-          fontSize: '2.2rem',
-          fontWeight: 800,
-          color: '#fff',
-          margin: 0,
-          marginBottom: 6,
-          letterSpacing: 0.5,
-          textShadow: '0 2px 12px rgba(106,95,199,0.13)'
-        }}>
-          Create a New Post
-        </h2>
-      </div>
-
-      <div style={{ padding: '2.5rem 2.5rem 2.5rem 2.5rem', display: 'flex', flexDirection: 'column', gap: 32, background: 'none', boxShadow: 'none' }}>
-        <div style={{ position: 'relative', marginBottom: 0 }}>
-          <select
-            id="channel"
-            value={selectedChannel}
-            onChange={(e) => setSelectedChannel(e.target.value)}
-            className="w-full edora-upload-input"
-            style={{
-              background: 'rgba(245,245,255,0.85)',
-              color: '#22223b',
-              border: '1.5px solid #dbeafe',
-              borderRadius: 14,
-              padding: '2.3rem 1rem 0.6rem 1rem',
-              fontSize: '1.08rem',
-              fontWeight: 500,
-              outline: 'none',
-              boxShadow: '0 1.5px 8px rgba(60, 120, 240, 0.04)',
-              transition: 'border-color 0.2s',
-              marginBottom: 0
-            }}
-            required
-          >
-            <option value="" disabled>
-              — Select a channel —
-            </option>
-            {channels.map((ch) => (
-              <option key={ch.id} value={ch.id}>
-                {ch.name} {ch.bio ? `(${ch.bio})` : ''}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="channel" style={{
-            position: 'absolute',
-            left: 18,
-            top: 8,
-            fontSize: '0.98rem',
-            color: '#6a5fc7',
-            fontWeight: 600,
-            pointerEvents: 'none',
-            background: 'rgba(255,255,255,0.85)',
-            padding: '0 6px',
-            borderRadius: 8,
-            zIndex: 2
-          }}>
-            Channel
-          </label>
-          {channels.length === 0 && (
-            <p className="mt-2 text-sm text-gray-600">
-              You haven't created any channels yet.{' '}
-              <button
-                type="button"
-                onClick={() => window.location.href = '/create'}
-                className="text-blue-600 hover:underline"
+    <div className="create-post-bg">
+      <div className="create-post-card create-post-wide">
+        <h1 className="create-post-main-title">Create a New Post</h1>
+        <div className="create-post-tagline">Share your knowledge or questions with the community.</div>
+        <form onSubmit={handleSubmit} className="create-post-form-2col">
+          <div className="create-post-row">
+            <div className="create-post-col title">
+              <label className="create-post-label">Title</label>
+              <input
+                className="create-post-input outline"
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Write your post title here..."
+                required
+              />
+            </div>
+            <div className="create-post-col channel">
+              <label className="create-post-label">Channel</label>
+              <select
+                className="create-post-input outline"
+                value={selectedChannel}
+                onChange={e => setSelectedChannel(e.target.value)}
+                required
               >
-                Create one now
-              </button>
-            </p>
-          )}
-        </div>
-
-        <div style={{ position: 'relative', marginBottom: 0 }}>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder=" "
-            required
-            className="w-full edora-upload-input"
-            style={{
-              background: 'rgba(245,245,255,0.85)',
-              color: '#22223b',
-              border: '1.5px solid #dbeafe',
-              borderRadius: 14,
-              padding: '2.3rem 1rem 0.6rem 1rem',
-              fontSize: '1.08rem',
-              fontWeight: 500,
-              outline: 'none',
-              boxShadow: '0 1.5px 8px rgba(60, 120, 240, 0.04)',
-              transition: 'border-color 0.2s',
-              marginBottom: 0
-            }}
-          />
-          <label htmlFor="title" style={{
-            position: 'absolute',
-            left: 18,
-            top: 8,
-            fontSize: '0.98rem',
-            color: '#6a5fc7',
-            fontWeight: 600,
-            pointerEvents: 'none',
-            background: 'rgba(255,255,255,0.85)',
-            padding: '0 6px',
-            borderRadius: 8,
-            zIndex: 2
-          }}>
-            Title
-          </label>
-        </div>
-
-        <div style={{ position: 'relative', marginBottom: 0 }}>
-          <textarea
-            id="desc"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder=" "
-            rows={4}
-            required
-            className="w-full edora-upload-input"
-            style={{
-              background: 'rgba(245,245,255,0.85)',
-              color: '#22223b',
-              border: '1.5px solid #dbeafe',
-              borderRadius: 14,
-              padding: '2.3rem 1rem 0.6rem 1rem',
-              fontSize: '1.08rem',
-              fontWeight: 500,
-              outline: 'none',
-              boxShadow: '0 1.5px 8px rgba(60, 120, 240, 0.04)',
-              transition: 'border-color 0.2s',
-              marginBottom: 0
-            }}
-          />
-          <label htmlFor="desc" style={{
-            position: 'absolute',
-            left: 18,
-            top: 8,
-            fontSize: '0.98rem',
-            color: '#6a5fc7',
-            fontWeight: 600,
-            pointerEvents: 'none',
-            background: 'rgba(255,255,255,0.85)',
-            padding: '0 6px',
-            borderRadius: 8,
-            zIndex: 2
-          }}>
-            Description
-          </label>
-        </div>
-
-        <div style={{ position: 'relative', marginBottom: 0 }}>
-          <input
-            id="files"
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            className="w-full edora-upload-input"
-            style={{
-              background: 'rgba(245,245,255,0.85)',
-              color: '#22223b',
-              border: '1.5px solid #dbeafe',
-              borderRadius: 14,
-              padding: '2.3rem 1rem 0.6rem 1rem',
-              fontSize: '1.08rem',
-              fontWeight: 500,
-              outline: 'none',
-              boxShadow: '0 1.5px 8px rgba(60, 120, 240, 0.04)',
-              transition: 'border-color 0.2s',
-              marginBottom: 0
-            }}
-          />
-          <label htmlFor="files" style={{
-            position: 'absolute',
-            left: 18,
-            top: 8,
-            fontSize: '0.98rem',
-            color: '#6a5fc7',
-            fontWeight: 600,
-            pointerEvents: 'none',
-            background: 'rgba(255,255,255,0.85)',
-            padding: '0 6px',
-            borderRadius: 8,
-            zIndex: 2
-          }}>
-            Attach files
-          </label>
-          <p className="mt-1 text-xs" style={{ color: '#6a5fc7', marginTop: 8 }}>
-            Max 5 files, 10 MB each (jpg, png, svg, zip)
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          disabled={channels.length === 0}
-          className="edora-upload-submit-btn"
-          style={{
-            width: '100%',
-            borderRadius: 18,
-            padding: '1.15rem 0',
-            fontWeight: 800,
-            fontSize: '1.18rem',
-            color: '#fff',
-            background: channels.length === 0
-              ? 'linear-gradient(90deg, #bdbdbd 0%, #c7c7c7 100%)'
-              : 'linear-gradient(90deg, #6d7fc9 0%, #6a5fc7 100%)',
-            cursor: channels.length === 0 ? 'not-allowed' : 'pointer',
-            boxShadow: channels.length === 0 ? 'none' : '0 8px 32px 0 rgba(123,47,242,0.13)',
-            border: '2px solid #dbeafe',
-            marginTop: 18,
-            letterSpacing: 0.7,
-            transition: 'all 0.18s cubic-bezier(.4,2,.3,1)'
-          }}
-          onMouseOver={e => {
-            if (!channels.length) return;
-            e.currentTarget.style.background = 'linear-gradient(90deg, #6d7fc9 0%, #5a6edc 100%)';
-            e.currentTarget.style.transform = 'scale(1.045)';
-            e.currentTarget.style.boxShadow = '0 12px 36px 0 rgba(106,95,199,0.18), 0 0 12px 2px #6d7fc9';
-            e.currentTarget.style.borderColor = '#6d7fc9';
-            e.currentTarget.style.textShadow = '0 2px 12px #6d7fc9cc';
-          }}
-          onMouseOut={e => {
-            if (!channels.length) return;
-            e.currentTarget.style.background = 'linear-gradient(90deg, #6d7fc9 0%, #6a5fc7 100%)';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(123,47,242,0.13)';
-            e.currentTarget.style.borderColor = '#dbeafe';
-            e.currentTarget.style.textShadow = 'none';
-          }}
-        >
-          {channels.length === 0 ? 'Create a Channel First' : 'Submit Post'}
-        </button>
+                <option value="" disabled>— Select a channel —</option>
+                {channels.map((ch) => (
+                  <option key={ch.id} value={ch.id}>{ch.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="create-post-files-row">
+            <label className="create-post-label">Attachments</label>
+            <input
+              className="create-post-input outline"
+              type="file"
+              multiple
+              onChange={handleFileChange}
+            />
+          </div>
+          <div>
+            <label className="create-post-label">Description</label>
+            <textarea
+              className="create-post-textarea outline"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Write your description or question here..."
+              rows={5}
+            />
+          </div>
+          <div className="create-post-preview-label">Post Preview</div>
+          <div className="create-post-preview-card">
+            <div className="create-post-preview-title">{title || 'Default Post Title'}</div>
+            <div className="create-post-preview-bio">{description || 'Default post description.'}</div>
+            <div className="create-post-preview-files">
+              {files.length > 0 ? (
+                <ul className="create-post-preview-files-list">
+                  {files.map((file, idx) => (
+                    <li key={idx} className="create-post-preview-file-item">
+                      <span className="file-icon" role="img" aria-label="file">📎</span>
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-size">{(file.size / 1024).toFixed(1)} KB</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span className="no-files">No files attached</span>
+              )}
+            </div>
+            <div className="create-post-preview-user">
+              <span className="avatar-circle">U</span>
+              <span className="username">@{username}</span>
+            </div>
+          </div>
+          {error && <div className="create-post-error">{error}</div>}
+          <button type="submit" className="create-post-btn-wide">Create your Post</button>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

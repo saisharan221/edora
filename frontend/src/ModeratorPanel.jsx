@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './App.css';
+import './ModeratorPanel.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -110,58 +110,69 @@ function ModeratorPanel() {
   };
 
   return (
-    <div className="moderator-panel" style={{ maxWidth: 900, margin: '0 auto', padding: 32 }}>
+    <div className="moderator-panel">
       <h2>Moderator Panel</h2>
       {error && <div className="error-container">{error}</div>}
-      <div className="panel-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+      <div className="panel-grid">
         {/* Flagged Posts */}
         <div className="panel">
           <h3>Flagged Posts</h3>
           {loading ? (
-            <div>Loading...</div>
+            <div className="loading-state">Loading...</div>
           ) : flaggedPosts.length === 0 ? (
-            <div className="empty-state">No flagged posts</div>
+            <div className="empty-state">
+              <p>No flagged posts</p>
+            </div>
           ) : (
-            <ul className="item-list">
+            <div>
               {flaggedPosts.map((post) => (
-                <li key={post.id} className="list-item" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <div><b>Title:</b> {post.title}</div>
-                  <div><b>Reason:</b> {post.flag_reason}</div>
-                  <div><b>Content:</b> {post.content}</div>
-                  <div style={{ marginTop: 8 }}>
-                    <button className="dashboard-button" onClick={() => handleApprove(post.id)} style={{ marginRight: 8 }}>Approve</button>
-                    <button className="dashboard-button secondary" onClick={() => handleDeletePost(post.id)}>Delete</button>
+                <div key={post.id} className="flagged-post">
+                  <div className="flagged-post-title">{post.title}</div>
+                  <div className="flagged-post-content">{post.content}</div>
+                  <div className="flagged-post-reason">Flagged: {post.flag_reason}</div>
+                  <div className="post-actions">
+                    <button className="approve-button" onClick={() => handleApprove(post.id)}>
+                      Approve
+                    </button>
+                    <button className="delete-button" onClick={() => handleDeletePost(post.id)}>
+                      Delete
+                    </button>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
+
         {/* Flagged Words */}
         <div className="panel">
           <h3>Flagged Words</h3>
-          <form onSubmit={handleAddWord} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <form onSubmit={handleAddWord} className="flagged-words-form">
             <input
               type="text"
               value={newWord}
               onChange={e => setNewWord(e.target.value)}
               placeholder="Add new word..."
-              className="input"
+              className="flagged-words-input"
               required
             />
-            <button className="dashboard-button" type="submit">Add</button>
+            <button className="add-button" type="submit">Add</button>
           </form>
           {flaggedWords.length === 0 ? (
-            <div className="empty-state">No flagged words</div>
+            <div className="empty-state">
+              <p>No flagged words</p>
+            </div>
           ) : (
-            <ul className="item-list">
+            <div>
               {flaggedWords.map((fw) => (
-                <li key={fw.id} className="list-item" style={{ justifyContent: 'space-between' }}>
-                  <span>{fw.word}</span>
-                  <button className="dashboard-button secondary" onClick={() => handleDeleteWord(fw.word)}>Delete</button>
-                </li>
+                <div key={fw.id} className="flagged-word-item">
+                  <span className="flagged-word-text">{fw.word}</span>
+                  <button className="delete-button" onClick={() => handleDeleteWord(fw.word)}>
+                    Delete
+                  </button>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>

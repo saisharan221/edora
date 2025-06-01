@@ -60,6 +60,10 @@
   height: 20px;
 }
 
+.sidebar .icon {
+  filter: brightness(0) saturate(100%) invert(32%) sepia(61%) saturate(747%) hue-rotate(217deg) brightness(80%) contrast(100%);
+}
+
 .nav-links a,
 .bottom-links a {
   display: block;
@@ -222,11 +226,14 @@
   color: #111;
 }
 
-body {
+body, #root, .app {
+  min-height: 100vh;
+  width: 100vw;
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: transparent;
-  color: #333;
+  padding: 0;
+  background: #f8f7fc url('./assets/background.svg') center center/cover no-repeat;
+  background-attachment: fixed;
+  box-sizing: border-box;
 }
 
 .app {
@@ -257,7 +264,7 @@ body {
 .nav-links .active {
   background: #e6f0ff;
   border-radius: 8px;
-  color: #005be4;
+  color: #6052dd;
   font-weight: bold;
 }
 
@@ -285,7 +292,7 @@ body {
 
 .username {
   font-weight: bold;
-  color: #333;
+  color: #1b1b1b;
 }
 
 .main-content {
@@ -874,6 +881,25 @@ textarea::placeholder {
   padding: 0.3rem 1rem;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+/* Gold, Silver, Bronze styles for top 3 */
+.leaderboard-modern-item:nth-child(1) .leaderboard-modern-points {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-modern-item:nth-child(2) .leaderboard-modern-points {
+  background: linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-modern-item:nth-child(3) .leaderboard-modern-points {
+  background: linear-gradient(135deg, #cd7f32 0%, #b36a2c 100%);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .action-card {
