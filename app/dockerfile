@@ -10,8 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy your FastAPI code
 COPY ./app ./app
 
-# Ensure uploads dir exists
-RUN mkdir -p /app/app/uploads
+# Ensure data and uploads directories exist
+RUN mkdir -p /app/data /app/uploads
 
 EXPOSE 8000
 

@@ -1,16 +1,46 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 .env
 .venv/
+venv/
 
-# Byte-compiled
-*.pyc
-
-# VSCode
+# IDEs and Editors
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Docker
 *.log
+
+# Database
 *.sqlite3
+data/app.db
+
+# Uploads
 /uploads/
+uploads/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node modules (if any)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

@@ -41,14 +41,26 @@ class Post(PostBase, table=True):
     # Relationships
     channel: "Channel" = Relationship(back_populates="posts")
     author: "User" = Relationship(back_populates="posts")
-    comments: List["Comment"] = Relationship(back_populates="post")
-    files: List["MediaFile"] = Relationship(back_populates="post")
-    reactions: List["PostReaction"] = Relationship(back_populates="post")
+    comments: List["Comment"] = Relationship(
+        back_populates="post", 
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    files: List["MediaFile"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    reactions: List["PostReaction"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
     tags: List["Tag"] = Relationship(
         back_populates="posts", 
         link_model=PostTag
     )
-    saved_by_users: List["SavedPost"] = Relationship(back_populates="post")
+    saved_by_users: List["SavedPost"] = Relationship(
+        back_populates="post",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
     flagged: bool = Field(default=False, nullable=False)
     flag_reason: Optional[str] = Field(default=None, max_length=256)
 

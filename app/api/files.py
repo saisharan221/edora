@@ -1,16 +1,15 @@
 import os
 from pathlib import Path
 from uuid import uuid4
-from typing import List
+from typing import List, Optional
 from fastapi.responses import FileResponse
 
 from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Form
 from sqlmodel import Session
 
 from app.database import engine
-from app.models import MediaFile
+from app.models.media_file import MediaFile
 from app.db import get_session
-from app.models.media_file import MediaFile  
 from app.api.auth import current_user, User  # reuse auth dependency
 
 UPLOAD_DIR = Path("uploads")
@@ -27,10 +26,11 @@ def db() -> Session:
 @router.post("/upload", response_model=List[MediaFile])
 async def upload_files(
     files: List[UploadFile] = File(...),
-    post_id: int = Form(None),
+    post_id: Optional[int] = Form(None),
     user: User = Depends(current_user),
     session: Session = Depends(db),
 ):
+    print(f"DEBUG: Uploading files with post_id: {post_id}")
     saved: list[MediaFile] = []
 
     for up in files:
@@ -52,14 +52,17 @@ async def upload_files(
             size=len(contents),
             post_id=post_id,
         )
+        print(f"DEBUG: Created MediaFile with post_id: {mf.post_id}")
         session.add(mf)
         saved.append(mf)
 
     session.commit()
     for mf in saved:
         session.refresh(mf)  # get the DB id
+        print(f"DEBUG: Saved MediaFile {mf.id} with post_id: {mf.post_id}")
 
     return saved
+
 
 @router.get("/{file_id}")
 def serve_file(file_id: int, session: Session = Depends(get_session)):

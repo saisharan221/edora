@@ -14,6 +14,9 @@ from app.models.flagged_word import FlaggedWord
 from app.gamification.service import GamificationService
 from app.gamification.models import ActionType
 from app.models.media_file import MediaFile
+from app.models.comment import Comment
+from app.models.post_reaction import PostReaction
+from app.models.saved_post import SavedPost
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -36,17 +39,17 @@ def create_post(
         )
     
     # ensure title uniqueness in the same channel (optional)
-    exists = session.exec(
-        select(Post).where(
-            Post.title == payload.title,
-            Post.channel_id == payload.channel_id,
-        )
-    ).first()
-    if exists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Post with that title already exists in this channel",
-        )
+    # exists = session.exec(
+    #     select(Post).where(
+    #         Post.title == payload.title,
+    #         Post.channel_id == payload.channel_id,
+    #     )
+    # ).first()
+    # if exists:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="Post with that title already exists in this channel",
+    #     )
     post = Post(**payload.dict(), author_id=current.id)
     # Check for flagged words
     flagged_words = session.exec(select(FlaggedWord)).all()
@@ -113,13 +116,51 @@ async def approve_post(post_id: int, session: Session = Depends(get_session), cu
     return {"ok": True}
 
 @router.delete("/{post_id}")
-async def delete_post(post_id: int, session: Session = Depends(get_session), current_user=Depends(require_moderator)):
+async def delete_post(
+    post_id: int, 
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(current_user)
+):
+    """Delete a post. Users can delete their own posts, moderators can delete any post."""
     post = session.get(Post, post_id)
     if not post:
         raise HTTPException(404, "Post not found")
+    
+    # Check if user has permission to delete this post
+    # Allow if user is the author OR if user is moderator/admin
+    if (post.author_id != current_user.id and 
+        current_user.role not in ("moderator", "admin")):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to delete this post"
+        )
+    
+    # Manually delete related records to avoid constraint violations
+    # Delete comments
+    comments = session.exec(select(Comment).where(Comment.post_id == post_id)).all()
+    for comment in comments:
+        session.delete(comment)
+    
+    # Delete media files
+    files = session.exec(select(MediaFile).where(MediaFile.post_id == post_id)).all()
+    for file in files:
+        session.delete(file)
+    
+    # Delete reactions
+    reactions = session.exec(select(PostReaction).where(PostReaction.post_id == post_id)).all()
+    for reaction in reactions:
+        session.delete(reaction)
+    
+    # Delete saved posts
+    saved_posts = session.exec(select(SavedPost).where(SavedPost.post_id == post_id)).all()
+    for saved_post in saved_posts:
+        session.delete(saved_post)
+    
+    # Now delete the post itself
     session.delete(post)
     session.commit()
-    return {"ok": True}
+    
+    return {"message": "Post deleted successfully"}
 
 @router.get("/test-moderator")
 async def test_moderator(current_user=Depends(require_moderator)):

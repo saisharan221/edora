@@ -14,12 +14,14 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
   const [reactionLoading, setReactionLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const token = localStorage.getItem('access_token');
   const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
   useEffect(() => {
     if (postId) {
+      fetchCurrentUser();
       fetchPost();
       fetchComments();
       fetchReactionCounts();
@@ -27,6 +29,21 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
       fetchSaveStatus();
     }
   }, [postId]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch(`${API}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(data);
+      }
+    } catch (err) {
+      console.error('Error fetching current user:', err);
+    }
+  };
 
   const fetchPost = async () => {
     try {
@@ -318,16 +335,6 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
           <header className="post-header">
             <h1 className="post-title">
               {post.title}
-              {(userRole === 'moderator' || userRole === 'admin') && (
-                <button
-                  onClick={handleDelete}
-                  style={{ color: '#ef4444', marginLeft: 20, fontSize: '1rem', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700, padding: '0.2em 0.7em', borderRadius: 8, transition: 'background 0.18s' }}
-                  onMouseOver={e => (e.currentTarget.style.background = '#fef2f2')}
-                  onMouseOut={e => (e.currentTarget.style.background = 'none')}
-                >
-                  Delete Post
-                </button>
-              )}
             </h1>
             <div className="post-meta">
               <div className="author-info">
@@ -345,17 +352,40 @@ export default function PostDetailView({ postId, onBack, onSaveChange, userRole 
                   <span className="post-date">{formatDate(post.created_at)}</span>
                 </div>
               </div>
-              <button
-                className={`save-button ${isSaved ? 'saved' : ''}`}
-                onClick={handleSave}
-                disabled={saveLoading}
-                title={isSaved ? 'Unsave post' : 'Save post'}
-              >
-                <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
-                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                </svg>
-                {isSaved ? 'Saved' : 'Save'}
-              </button>
+              <div className="post-actions-header">
+                <button
+                  className={`save-button ${isSaved ? 'saved' : ''}`}
+                  onClick={handleSave}
+                  disabled={saveLoading}
+                  title={isSaved ? 'Unsave post' : 'Save post'}
+                >
+                  <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                  {isSaved ? 'Saved' : 'Save'}
+                </button>
+                
+                {/* Show delete button if user is the author or a moderator/admin */}
+                {(currentUser && (
+                  currentUser.id === post.author_id || 
+                  currentUser.role === 'moderator' || 
+                  currentUser.role === 'admin'
+                )) && (
+                  <button
+                    className="delete-button"
+                    onClick={handleDelete}
+                    title="Delete post"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3,6 5,6 21,6" />
+                      <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </header>
 
