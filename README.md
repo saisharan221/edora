@@ -28,7 +28,6 @@ Install the following software:
 ```bash
 unzip edora-source.zip
 cd edora
-chmod +x setup.sh && ./setup.sh
 ```
 
 2. **Run the application**:
@@ -211,7 +210,7 @@ edora/
 **Frontend:**
 - React - UI framework
 - Vite - Build tool
-- Tailwind CSS - Styling
+- CSS - Styling
 - JavaScript (ES6+)
 
 ## Testing the Application
